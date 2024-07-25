@@ -120,15 +120,33 @@ These instructions are for the mode of operation most common in ground-based tes
 
 Start each application in a separate terminal window.
 
-> **NOTE:** Update these commands once back in front of a ground station
-
 1. [ ] `cd ~/git/TIMflight`
-3. `groundhog`
-4. `guaca`
-5. `owl`
-6. `kst`
-7. `cow`
-8. `attitude_vis`
+2. [ ] `./groundhog/build/groundhog -pilot_only`
+    1. You will not see any output unless a FC is found and `mcp` is running.
+3. [ ] `sudo ./guaca/guaca`
+    1. In "Linklist Dir" window, select the dirfile corresponding to the telemetry
+    2. Click "Start MOLE"
+    3. The dancing avocado will be unhappy unless a dirfile is being updated by `groundhog`
+4. [ ] `sudo ./cow/cow`
+    1. In the pop-up window, enter the IP of the FC you want to command, typically `192.168.1.3`
+    2. Click "Connect"
+    3. This will hang unless a the FC is pingable and is running the `blastcmd` daemon
+4. [ ] `./owl/owl owl-files/time/tim2024.owl &`
+5. [ ] `./owl/owl owl-files/time/motor_controller_status.owl &`
+6. [ ] `./owl/owl owl-files/time/pointing.owl &`
+7. [ ] `kst2 ./kst/tim/<any_file_of_interest>.kst &`
+    1. Repeat for any other `kst` files
+
+The next scripts are optional.
+
+8. [ ] `attitude_vis`: animated gondola model
+    1. Activate `conda` environment with packages to display animated gondola model: `conda activate ecm`
+    2. `cd ~/evanmayer/vis/`
+    3. `./start_vis.sh`
+9. [ ] `scan_rate_vis`: rotary displays of Az/El
+    1. If not already done, activate `conda` environment with packages to display animated gondola model: `conda activate ecm`
+    2. `cd ~/evanmayer/vis/`
+    3. `python3 ./scan_rate_vis.py`
 
 ## Power Off
 
