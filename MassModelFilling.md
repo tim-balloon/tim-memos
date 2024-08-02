@@ -11,17 +11,14 @@ Evan C. Mayer
 
 ## Relevant Constants
 
-ID: 23.5 in
-Interior height: 36 in
-Crosstube diameter: 21 in / $\pi$
-Body internal area: 433.7 in^2 = 3.012 ft^2
-
-Body vol: 9.036 ft^3
-Crosstube vol: 0.477 ft^3 (about 5%)
-
-Net vol: 8.56 ft^3
-
-Est. Req. filler weight: 1180 lb
+* ID: 23.5 in
+* Interior height: 36 in
+* Crosstube diameter: 21 in / $\pi$
+* Body internal area: 433.7 in^2 = 3.012 ft^2
+* Body vol: 9.036 ft^3
+* Crosstube vol: 0.477 ft^3 (about 5%)
+* Net vol: 8.56 ft^3
+* Est. Req. filler weight: 1180 lb
 
 ## Layer 1
 
