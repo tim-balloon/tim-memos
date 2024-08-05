@@ -130,9 +130,9 @@ El position limits are enforced by commanding a correcting velocity in the direc
 * `Pointing Modes`>`cur_mode`: <font color='red'>sends N amps to each axis</font>
     * With 0 amps to each axis, forces 0 current to all axes.
 
-> **WARNING:** If `cur_mode 0 0 0` is sent, gondola will continue moving if already moving, and el axis may fall if unbalanced and not locked.
+> **CAUTION:** If `cur_mode 0 0 0` is sent, gondola will continue moving if already moving, and el axis may fall if unbalanced and not locked.
 
-> **WARNING:** If the instrument is scheduled to observe particular targets (check `/data/blast/*.sch` on the flight computers), the pointing mode may change on its own! This may take you out of `stop` or `cur_mode`!
+> **CAUTION:** If the instrument is scheduled to observe particular targets (check `/data/blast/*.sch` on the flight computers), the pointing mode may change on its own! This may take you out of `stop` or `cur_mode`!
 
 ### Lock Pin Positions
 
@@ -202,22 +202,72 @@ If this warning is not obeyed, it is possible based on their shutdown state that
 
 Goals of pointing test may vary depending on flight readiness/sensor availability.
 
+#### Engage Lock Pin
+
+1. [ ] Manually move the inner frame to align the lock pin with the 45 degree lock pin hole to within the lock pin tolerance: `actuators.h:LOCK_THRESHOLD_DEG`
+2. [ ] Engage the lock pin: `Lock Motor`>`lock 45`
+
 #### Ensure Sensors Are Trimmed
 
-"Trimming" a sensor means manually setting an offset so that it is forced to agree with some external truth. This is typically another sensor or a reference external to the gondola. Commands also exist to trim one poor sensor to agree with a better one.
+"Trimming" a sensor means manually setting an offset so that it is forced to agree with some external truth at some point in time. This is typically another sensor or a reference external to the gondola. Commands also exist to trim one poor sensor to agree with a better one.
 
-* `Pointing Sensors`>`az_el_trim`: manually set the pointing solution Az/El; trimmable sensors will have their trim offset changed (change rate limited) to agree with this.
-* 
+* `Pointing Sensor Trims`>`reset_trims`: Set all trim values to 0
 
 ##### Procedure
 
-1. [ ] Lock gondola to 0 deg using the lock pin:
-2. [ ] Check available El sensors: are they consistent with 0 deg? Trim to enforce consistency.
-3. [ ] Check available Az sensors: are their readings consistent with TIM boresight alignment to a compass or other reference surface (building foundation, landmark, etc.)? Trim to enforce consistency.
+If star camera solutions are available:
 
-#### Az/El Goto
+1. [ ] `Pointing Sensor Trims`>`xsc_offset 0 <cross-el trim> <el trim>`
+    1. Input the values which, when added to the star camera 0 Az/El, force it to agree with the actual Az/El of the inner frame, measured by an external reference.
+2. [ ] `Pointing Sensor Trims`>`trim_xsc1_to_xsc0`
+    1. Adjust star camera 1 offsets to agree with star camera 0
+3. [ ] `Pointing Sensor Trims`>`trim_to_xsc0`
+    1. Adjust sensor trims to agree with star camera 0
+4. [ ] `Pointing Sensor Trims`>`autotrim_to_sc`
+    1. Once commanded, begin updating sensor trims each time a star camera solution is obtained; take star camera Az/El solutions as truth
 
-#### El Scan
+If no star camera solutions are available:
+
+1. [ ] `Pointing Sensor Trims`>`az_el_trim <true Az> <true El>`
+    1. Manually set the pointing solution Az/El; trimmable sensors will have their trim offset changed (though change is rate limited) to agree with this.
+    2. List of sensor trims changed:
+        * Inclinometer 1 El
+        * Inclinometer 2 El
+        * Motor Encoder El
+        * Magnetometer 1 Az
+        * Magnetometer 2 Az
+        * Pinhole sun sensor array Az (only if good data is recent)
+        * CSBF GPS compass
+
+#### El Only
+
+Ensure El motor controller STO jumpers are installed. If a new STO jumper is installed, clear the latched STO fault by power cycling the controller.
+
+1. [ ] Enter stop mode to prepare for enablement: `Pointing Modes`>`stop`
+2. [ ] Enable motor: `Pointing Motors`>`el_on`
+3. [ ] Retract lock pin: `Lock Motor`>`unlock`
+
+The El motor should engage when the lock pin has retracted, catching the inner frame. Motion should be arrested.
+
+##### Az/El Goto
+
+1. [ ] Static: `Pointing Modes`>`az_el_goto <current Az> <current El>`: fields populated with current estimated Az/El, do not change for now
+    1. Enters goto mode without attempting to move.
+2. [ ] Move: `Pointing Modes`>`az_el_goto <current Az> <MIN_EL>`: Az field populated with current estimated Az, do not change for now. Look up `motors.h:MIN_EL` to attempt to go to the minimum software-allowed El.
+
+1. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto <current Az> <MAX_EL>`: Az field populated with current estimated Az, do not change for now. Look up `motors.h:MAX_EL` to attempt to go to the maximum software-allowed El.
+
+##### El Scan
+
+1. [ ] `Pointing Modes`>`el_scan <current Az> 45 10 0.1`:
+    * Centered on current Az
+    * Centered on 45 deg El
+    * Total scan height 10 deg El
+    * Scan speed 0.1 deg/s
+
+##### Lock El
+
+1. [ ] `Lock Motor`>`lock45`
 
 #### Az Scan
 

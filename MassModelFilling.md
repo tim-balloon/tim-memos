@@ -68,3 +68,15 @@ All purpose sand:
 Total weight:
 * 189 + 605.8 + 157.5 + 126 = 1078.3
 * short ~100 lb, within margin of error, can be made up with counterweights 
+
+# Addendum 8/5/2024
+
+Pouring of the mass model is complete. The final contents are:
+
+* 3x: 60 lb bags Quikrete
+* 10-3/8" thickness: mixture of Quikrete washed gravel and Quikrete sand
+* 3x" 80 lb bags Quikrete
+* 2.5x + 1.25x: mixture of Quikrete washed gravel + Quikrete sand
+* 1.5x: 80 lb bags Quikrete
+
+We called an audible and poured concrete in the middle to help transmit load from the upper fill to the el axis, which it was unclear if the looser gravel would do.
