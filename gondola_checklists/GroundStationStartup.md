@@ -105,20 +105,20 @@ If the flight software or ground software has changed since the last build, it i
 `owl` is a GUI that provides a live telemetry dashboard of current values.
 
 1. [ ] `cd ~/git/TIMflight/owl/`
-2. [ ] `./configure $$ make`
+2. [ ] `./configure && make`
 
 ### Build `cow`
 
 `cow` is the Command Operations Window, a GUI that allows sending commands to a flight computer.
 
 1. [ ] `cd ~/git/TIMflight/cow/`
-2. [ ] `./configure $$ make`
+2. [ ] `./configure && make`
 
 ## Start Ground Station Software
 
 These instructions are for the mode of operation most common in ground-based testing, where the ground station is able to ping the flight computers. Other command-line options may be necessary for other telemetry links or ground station configurations. Consult Ian Lowe or Evan Mayer for these situations.
 
-Start each application in a separate terminal window.
+Start each application in a separate terminal tab.
 
 1. [ ] `cd ~/git/TIMflight`
 2. [ ] `./groundhog/build/groundhog -pilot_only`
