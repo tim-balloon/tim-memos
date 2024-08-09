@@ -137,7 +137,9 @@ El position limits are enforced by commanding a correcting velocity in the direc
 ### Lock Pin Positions
 
 * 0 deg
+* 22.5
 * 45 deg
+* 67.5
 * 90 deg
 
 ### Required Sensors
