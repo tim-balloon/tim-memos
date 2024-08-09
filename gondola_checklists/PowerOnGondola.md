@@ -85,8 +85,9 @@ If connecting new devices, reconnecting old devices, or connecting a new power c
 6. [ ] Plug in power cable
 7. [ ] Power on PBoB output
 8. [ ] Use multimeter to verify voltage at cable end
-9. [ ] Connect cable to device
-10. [ ] Power on PBoB output
+9. [ ] Power off PBoB
+10. [ ] Connect cable to device
+11. [ ] Power on PBoB output
 
 > **WARNING:** Capacitance inside the PBoB may cause voltage to decay slowly after switching output power off if no load is connected. Use a multimeter to ensure that voltage has reduced to a safe level before plugging in any device.
 
