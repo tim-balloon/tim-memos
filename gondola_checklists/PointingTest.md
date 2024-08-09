@@ -192,12 +192,12 @@ If this warning is not obeyed, it is possible based on their shutdown state that
 <hr>
 
 3. **Immediately** issue `cow` or `blastcmd` commands:
-	1. Pointing Modes > `cur_mode 0 0 0`
-		1. Manually sets all motor current outputs to 0
-	2. Pointing Motors > `az_off`
-		1. Disables azimuth control algorithm outputs
-	3. Pointing Motors > `el_off`
-		1. Disables elevation control algorithm output
+    1. Pointing Modes > `cur_mode 0 0 0`
+        1. Manually sets all motor current outputs to 0
+    2. Pointing Motors > `az_off`
+        1. Disables azimuth control algorithm outputs
+    3. Pointing Motors > `el_off`
+        1. Disables elevation control algorithm output
 4. Verify good telemetry reception via `groundhog`, `kst`, and `owl` windows
 
 ### Pointing Test
@@ -243,11 +243,10 @@ If no star camera solutions are available:
 
 #### El Only
 
-Ensure El motor controller STO jumpers are installed. If a new STO jumper is installed, clear the latched STO fault by power cycling the controller.
-
-1. [ ] Enter stop mode to prepare for enablement: `Pointing Modes`>`stop`
-2. [ ] Enable motor: `Pointing Motors`>`el_on`
-3. [ ] Retract lock pin: `Lock Motor`>`unlock`
+1. [ ] Ensure El motor controller STO jumper is installed. Set down the gondola before inserting jumpers. If a new STO jumper is installed, clear the latched STO fault by power cycling the controller.
+2. [ ] Enter stop mode to prepare for enablement: `Pointing Modes`>`stop`
+3. [ ] Enable motor: `Pointing Motors`>`el_on`
+4. [ ] Retract lock pin: `Lock Motor`>`unlock`
 
 The El motor should engage when the lock pin has retracted, catching the inner frame. Motion should be arrested.
 
@@ -270,9 +269,86 @@ The El motor should engage when the lock pin has retracted, catching the inner f
 ##### Lock El
 
 1. [ ] `Lock Motor`>`lock45`
+2. [ ] `Pointing Modes`>`stop`
+3. [ ] `Pointing Motors`>`el_off`
+3. [ ] Remove El axis STO jumper
 
-#### Az Scan
+#### Az Only
 
-#### RA/Dec Goto
+1. [ ] Ensure reaction wheel (RW) and pivot (Piv) motor controller STO jumpers are installed. Set down the gondola before inserting jumpers. If a new STO jumper is installed after controller power-on, clear the latched STO fault by power cycling the controller.
+2. [ ] Enter `cur_mode` with 0 current to prepare for enablement: `Pointing Modes`>`cur_mode 0 0 0`
+    * piv current 0
+    * RW current 0
+    * El current 0
+3. [ ] Prepare team for gondola Az motion: when the RW is halted and then turned on, it must spin up to its setpoint - some transient outer frame motion is expected while the spin-up angular momentum is dumped through the pivot and the control system reaches steady-state.
+4. [ ] Enable Az motors: `Pointing Motors`>`az_on`
+
+##### Az/El Goto
+
+We have written 0 Az here as the first move, assuming that it is practical given the space available. You can offset the Az moves by any amount that works for you.
+
+1. [ ] Static: `Pointing Modes`>`az_el_goto <current Az> <current El>`: fields populated with current estimated Az/El, do not change for now
+    1. Enters goto mode without attempting to move.
+2. [ ] Move: `Pointing Modes`>`az_el_goto 0 <current El>`: Slew to 0 Az, or another value that makes sense given the current Az and the surroundings. El field populated with current estimated El, do not change for now.
+3. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 5 <current El>`: A small move in positive Az (clockwise as seen from above; Az is defined as a positive rotation east of north)
+4. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 45 <current El>`: A larger move in positive Az
+5. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 0 <current El>`: Back to 0
+5. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 90 <current El>`: A larger move
+
+##### Az Scan
+
+1. [ ] `Pointing Modes`>`az_scan 0 <current El> 0.1 0.05`:
+    * Centered on 0 Az
+    * Centered on current El
+    * Total scan width 0.1 deg Az
+    * Scan speed 0.05 deg/s
+2. [ ] `Pointing Modes`>`az_scan 0 <current El> 5 0.1`:
+    * Centered on 0 Az
+    * Centered on current El
+    * Total scan width 5 deg Az
+    * Scan speed 0.1 deg/s
+3. [ ] `Pointing Modes`>`stop`
+4. [ ] `Pointing Motors`>`az_off`
+
+Be prepared to catch the gondola - as the RW spins down, the gondola will begin to spin
+
+#### Both Axes
+
+1. [ ] Ensure El axis, reaction wheel (RW), and pivot (Piv) motor controller STO jumpers are installed. If required for access, set down the gondola or bring down the pivot before inserting jumpers. If a new STO jumper is installed after controller power-on, clear the latched STO fault by power cycling the controller.
+2. [ ] Enter stop mode to prepare for enablement: `Pointing Modes`>`stop`
+3. [ ] Enable El motor: `Pointing Motors`>`el_on`
+4. [ ] Retract lock pin: `Lock Motor`>`unlock`
+
+The El motor should engage when the lock pin has retracted, catching the inner frame. Motion should be arrested.
+
+5. [ ] Prepare team for gondola Az motion: when the RW is halted and then turned on, it must spin up to its setpoint - some transient outer frame motion is expected while the spin-up angular momentum is dumped through the pivot and the control system reaches steady-state.
+6. [ ] Enable Az motors: `Pointing Motors`>`az_on`
+
+##### Az/El Goto
+
+We have written 0 Az here as the first move, assuming that it is practical given the space available. You can offset the Az moves by any amount that works for you.
+
+1. [ ] Static: `Pointing Modes`>`az_el_goto <current Az> <current El>`: fields populated with current estimated Az/El, do not change for now
+    1. Enters goto mode without attempting to move.
+2. [ ] Move: `Pointing Modes`>`az_el_goto 0 20`: Slew to 0 Az, or another value that makes sense given the current Az and the surroundings. 20 El, near the lower software limit.
+3. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 5 25`: A small move in positive Az (clockwise as seen from above; Az is defined as a positive rotation east of north), small move in positive El
+4. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 45 45`
+5. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 0 55`
+6. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 90 20`
+7. [ ] Az/El Goto: move: `Pointing Modes`>`az_el_goto 0 45`
+
+##### RA/Dec Goto
+
+1. [ ] Track: `Pointing Modes`>`ra_dec_goto <current RA> <current Dec>`: fields populated with current estimated RA/Dec track this RA/Dec
+2. [ ] Observe the Ra/Dec tracking
+
+#### Parking the scope
+
+1. [ ] `Pointing Modes`>`stop`
+2. [ ] `Lock Motor`>`lock45`
+3. [ ] `Pointing Motors`>`el_off`
+4. [ ] `Pointing Motors`>`az_off`
+
+Be prepared to catch the gondola - as the RW spins down, the gondola will begin to spin.
 
 # References
