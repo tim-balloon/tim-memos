@@ -2,7 +2,7 @@ Evan C. Mayer
 
 evanmayer@arizona.edu
 
-Last Updated: 2024-07-23
+Last Updated: 2024-08-18
 
 # Purpose
 
@@ -62,7 +62,7 @@ N/A
 ## Lift Preparation
 
 1. [ ] Check crane load capacity
-    1. If TIM gondola exceeds crane load capacity, do not proceed with the lift.
+    1. If TIM gondola exceeds crane load capacity, do not proceed with the lift
 2. [ ] Clean up! **Remove debris from gondola and surrounding area**
     1. **No loose items on the gondola or inside rotational envelope**
 3. [ ] Check lift points
@@ -89,7 +89,7 @@ N/A
 
 > ***<font color="red">STOP:*** If you will be proceeding to a pointing test of the gondola after the lift, consult the Power-on Gondola SOP now.</font>
 
-[Power-on Gondola Standard Operating Procedure](./PowerOnGondola.md.md)
+[Power-on Gondola Standard Operating Procedure](./PowerOnGondola.md)
 
 <br>
 
@@ -104,7 +104,7 @@ Required personnel:
 
 ### Begin lift
 
-1. [ ] Notify bystanders of lift: "LIFT WARNING" or similar
+1. [ ] Notify bystanders of lift: Talk to each one, "LIFT WARNING" or similar
     1. *You must be loud enough to notify bystanders who may not be paying attention to the lift*
 2. [ ] Double check hard hats and shoes
 3. [ ] Disengage crane safety mechanism

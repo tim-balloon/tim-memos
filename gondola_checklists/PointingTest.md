@@ -2,7 +2,7 @@ Evan C. Mayer
 
 evanmayer@arizona.edu
 
-Last Updated: 2024-08-01
+Last Updated: 2024-08-18
 
 # Purpose
 
@@ -38,7 +38,7 @@ This SOP applies during the process leading up to and during an operation where 
     * 1 spotter for surroundings
     * 2 ground station operators
 
-* Always maintain a clean and clear work area around the ground station computer. Accidental keystrokes at the ground station can end the experiment.
+* Always maintain a clean and clear work area around the ground station computer. Accidental keystrokes at the ground station can end the experiment. Always maintain line of sight between the ground station and inner frame; this may be fulfilled by a spotter if the inner frame is obscured by the sun shield.
 
 ## Personal Protective Equipment
 
@@ -60,6 +60,7 @@ N/A
 
 * [Ground Station Startup](./GroundStationStartup.md): Required before beginning, in order to have ground software ready to issue commands before powering gondola on, and ready to view telemetry to interpret gondola and flight software behavior
 * [Power-on Gondola](./PowerOnGondola.md): Required to safely check out and power on gondola in order to move using the flight software
+* [Sensor Calibration](./SensorCalibration.md): Required to accurately control pointing and operate lock pin
 
 # Procedure
 
@@ -88,6 +89,8 @@ The TIM gondola is controlled primarily via the Command Operations Window, `cow`
 Commands are organized into groups. Groups are selectable in the main window. Commands are selectable from the left sidebar. Once selected, if a command takes parameters, they will appear in the main window. Sending a command is done via clicking the button in the lower right or pressing `Shift + F12`. The equivalent `blastcmd` invocation is echoed in the status window at the bottom. Invalid commands are called out here.
 
 ### Hard Stops
+
+For the TIM test flight, there are NO HARD STOPS. Cable wrapping is mitigated somewhat by the starboard cable feedthrough, but is still a concern. Do not flip TIM.
 
 ### Software Limits
 
@@ -243,7 +246,7 @@ If no star camera solutions are available:
 
 #### El Only
 
-1. [ ] Ensure El motor controller STO jumper is installed. Set down the gondola before inserting jumpers. If a new STO jumper is installed, clear the latched STO fault by power cycling the controller.
+1. [ ] Ensure El motor controller STO jumper is installed. Set down the gondola before inserting jumpers. If a new STO jumper is installed after power-on, clear the latched STO fault by commanding to clear the fault (`reset_latched_el 18`) or power cycling the controller.
 2. [ ] Enter stop mode to prepare for enablement: `Pointing Modes`>`stop`
 3. [ ] Enable motor: `Pointing Motors`>`el_on`
 4. [ ] Retract lock pin: `Lock Motor`>`unlock`
@@ -271,11 +274,11 @@ The El motor should engage when the lock pin has retracted, catching the inner f
 1. [ ] `Lock Motor`>`lock45`
 2. [ ] `Pointing Modes`>`stop`
 3. [ ] `Pointing Motors`>`el_off`
-3. [ ] Remove El axis STO jumper
+3. [ ] Remove El axis STO jumper if desired
 
 #### Az Only
 
-1. [ ] Ensure reaction wheel (RW) and pivot (Piv) motor controller STO jumpers are installed. Set down the gondola before inserting jumpers. If a new STO jumper is installed after controller power-on, clear the latched STO fault by power cycling the controller.
+1. [ ] Ensure reaction wheel (RW) and pivot (Piv) motor controller STO jumpers are installed. Set down the gondola before inserting jumpers. If a new STO jumper is installed after power-on, clear the latched STO fault by commanding to clear the fault (`reset_latched_rw 18`, `reset_latched_piv 18`) or power cycling the controller.
 2. [ ] Enter `cur_mode` with 0 current to prepare for enablement: `Pointing Modes`>`cur_mode 0 0 0`
     * piv current 0
     * RW current 0
@@ -314,7 +317,7 @@ Be prepared to catch the gondola - as the RW spins down, the gondola will begin 
 
 #### Both Axes
 
-1. [ ] Ensure El axis, reaction wheel (RW), and pivot (Piv) motor controller STO jumpers are installed. If required for access, set down the gondola or bring down the pivot before inserting jumpers. If a new STO jumper is installed after controller power-on, clear the latched STO fault by power cycling the controller.
+1. [ ] Ensure El axis, reaction wheel (RW), and pivot (Piv) motor controller STO jumpers are installed. If required for access, set down the gondola or bring down the pivot before inserting jumpers. If a new STO jumper is installed after power-on, clear the latched STO fault by commanding to clear the fault (`reset_latched_rw 18`, `reset_latched_piv 18`, `reset_latched_el 18`) or power cycling the controller.
 2. [ ] Enter stop mode to prepare for enablement: `Pointing Modes`>`stop`
 3. [ ] Enable El motor: `Pointing Motors`>`el_on`
 4. [ ] Retract lock pin: `Lock Motor`>`unlock`

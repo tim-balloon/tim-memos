@@ -4,7 +4,7 @@ Evan C. Mayer
 
 evanmayer@arizona.edu
 
-Last Updated: 2024-07-23
+Last Updated: 2024-08-18
 
 # Purpose
 
@@ -128,7 +128,7 @@ Start each application in a separate terminal tab.
     2. Click "Start MOLE"
     3. The dancing avocado will be unhappy unless a dirfile is being updated by `groundhog`
 4. [ ] `sudo ./cow/cow`
-    1. In the pop-up window, enter the IP of the FC you want to command, typically `192.168.1.3`
+    1. In the pop-up window, enter the IP of the FC you want to command, typically `192.168.1.3` (fc1)
     2. Click "Connect"
     3. This will hang unless a the FC is pingable and is running the `blastcmd` daemon
 4. [ ] `./owl/owl owl-files/time/tim2024.owl &`
@@ -150,6 +150,8 @@ The next scripts are optional.
 
 ## Power Off
 
-`sudo shutdown`
+If you don't want to restart all of the ground station software do not shut down. You can leave all software including `groundhog` running, since disk usage only increases when receiving downlinked data from `mcp`. Thus, it advised to shut down the flight computers and leave ground software running.
+
+Otherwise, `sudo shutdown` like normal.
 
 # References
