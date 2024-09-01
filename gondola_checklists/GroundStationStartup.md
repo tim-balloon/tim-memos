@@ -108,6 +108,8 @@ If the flight software or ground software has changed since the last build, it i
 2. [ ] `conda activate ecm`
 2. [ ] `./configure-qt5 && make`
 
+> **NOTE:** If you run into linker errors (e.g. `cannot find -lpython3.11`), run `python3.11-config --ldflags`, copy the output into the Makefile at the end of the `LIBS` line, and run `make` again.
+
 ### Build `cow`
 
 `cow` is the Command Operations Window, a GUI that allows sending commands to a flight computer.
