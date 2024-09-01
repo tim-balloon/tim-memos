@@ -33,7 +33,7 @@ This SOP applies during the process leading up to and during an operation where 
 ## Work Practices
 
 * Required personnel:
-    * 1 of: Evan Mayer, Justin Bracks, Ian Lowe
+    * 1 of: Evan Mayer, Justin Bracks, Ian Lowe, Shubh Agrawal
 
 ## Personal Protective Equipment
 
@@ -75,7 +75,7 @@ If connecting new devices, reconnecting old devices, or connecting a new power c
 
 1. [ ] Check device spec sheet to verify voltage tolerance
     1. [Datasheets](https://drive.google.com/drive/u/0/folders/1erbkUpVd5UW-Y4VRA8wPCMF6vXLMjCDW)
-2. Cross-check command against PBoB output number:
+2. [ ] Cross-check command against PBoB output number:
     1. Open `TIMflight/mcp/commanding/commands.c`
     2. Check `SingleCommand()` switch case for command name
     3. Verify intended command's relay number matches number on outside of PBoB
@@ -112,7 +112,7 @@ Ensure power-on state of gondola/software prohibits motion.
 ## Power-on Operation
 
 1. [ ] Apply power to power breakouts
-    1. Apply AC power to E-FUEL by turning switch to ON, set to 24 VDC
+    1. Apply AC power to E-FUEL by turning switch to ON, set to 28 VDC
     2. Power is supplied to rest of gondola devices
 2. [ ] Listen for flight computer bring-up - BIOS beeps
 

@@ -105,7 +105,8 @@ If the flight software or ground software has changed since the last build, it i
 `owl` is a GUI that provides a live telemetry dashboard of current values.
 
 1. [ ] `cd ~/git/TIMflight/owl/`
-2. [ ] `./configure && make`
+2. [ ] `conda activate ecm`
+2. [ ] `./configure-qt5 && make`
 
 ### Build `cow`
 
@@ -131,9 +132,9 @@ Start each application in a separate terminal tab.
     1. In the pop-up window, enter the IP of the FC you want to command, typically `192.168.1.3` (fc1)
     2. Click "Connect"
     3. This will hang unless a the FC is pingable and is running the `blastcmd` daemon
-4. [ ] `./owl/owl owl-files/time/tim2024.owl &`
-5. [ ] `./owl/owl owl-files/time/motor_controller_status.owl &`
-6. [ ] `./owl/owl owl-files/time/pointing.owl &`
+4. [ ] `./owl/owl ./owl/owl-files/time/tim2024.owl &`
+5. [ ] `./owl/owl ./owl/owl-files/time/motor_controller_status.owl &`
+6. [ ] `./owl/owl ./owl/owl-files/time/pointing.owl &`
 7. [ ] `kst2 ./kst/tim/<any_file_of_interest>.kst &`
     1. Repeat for any other `kst` files
 

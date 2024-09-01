@@ -135,7 +135,7 @@ El position limits are enforced by commanding a correcting velocity in the direc
 
 > **CAUTION:** If `cur_mode 0 0 0` is sent, gondola will continue moving if already moving, and el axis may fall if unbalanced and not locked.
 
-> **CAUTION:** If the instrument is scheduled to observe particular targets (check `/data/blast/*.sch` on the flight computers), the pointing mode may change on its own! This may take you out of `stop` or `cur_mode`!
+> **CAUTION:** If the instrument is scheduled to observe particular targets (check `/data/etc/blast/*.sch` on the flight computers), the pointing mode may change on its own! This may take you out of `stop` or `cur_mode`!
 
 ### Lock Pin Positions
 
@@ -185,7 +185,7 @@ When all personnel present are aware, and `cow` or `blastcmd` are ready to issue
 
 <hr> 
 
-**IF AND ONLY IF THE WATCHDOG IS CONNECTED TO BOTH FCs**:
+<font color='red'>**IF AND ONLY IF THE WATCHDOG IS CONNECTED TO BOTH FCs**:</font>
 
 If this warning is not obeyed, it is possible based on their shutdown state that both FCs may assume they are in charge and issue conflicting commands.
 
