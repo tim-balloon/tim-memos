@@ -106,7 +106,7 @@ If the flight software or ground software has changed since the last build, it i
 
 1. [ ] `cd ~/git/TIMflight/owl/`
 2. [ ] `conda activate ecm`
-2. [ ] `./configure-qt5 && make`
+3. [ ] `./configure-qt5 && make`
 
 > **NOTE:** If you run into linker errors (e.g. `cannot find -lpython3.11`), run `python3.11-config --ldflags`, copy the output into the Makefile at the end of the `LIBS` line, and run `make` again.
 
@@ -114,6 +114,7 @@ If the flight software or ground software has changed since the last build, it i
 
 `cow` is the Command Operations Window, a GUI that allows sending commands to a flight computer.
 
+0. [ ] `conda deactivate ecm`, if still in `ecm` cond env
 1. [ ] `cd ~/git/TIMflight/cow/`
 2. [ ] `./configure && make`
 
@@ -124,29 +125,31 @@ These instructions are for the mode of operation most common in ground-based tes
 Start each application in a separate terminal tab.
 
 1. [ ] `cd ~/git/TIMflight`
-2. [ ] `./groundhog/build/groundhog -pilot_only`
+2. [ ] `conda deactivate ecm`, if still in `ecm` conda env
+3. [ ] `./groundhog/build/groundhog -pilot_only` or `-evtm_only`, e.g.
     1. You will not see any output unless a FC is found and `mcp` is running.
-3. [ ] `sudo ./guaca/guaca`
-    1. In "Linklist Dir" window, select the dirfile corresponding to the telemetry
+4. [ ] `sudo ./guaca/guaca`
+    1. In "Linklist Dir" window, select the dirfile corresponding to the telemetry link, e.g. `EVTM_LOS_live` or `PILOT_live` for the latest linklist file
     2. Click "Start MOLE"
-    3. The dancing avocado will be unhappy unless a dirfile is being updated by `groundhog`
-4. [ ] `sudo ./cow/cow`
-    1. In the pop-up window, enter the IP of the FC you want to command, typically `192.168.1.3` (fc1)
-    2. Click "Connect"
-    3. This will hang unless a the FC is pingable and is running the `blastcmd` daemon
-4. [ ] `./owl/owl ./owl/owl-files/time/tim2024.owl &`
-5. [ ] `./owl/owl ./owl/owl-files/time/motor_controller_status.owl &`
-6. [ ] `./owl/owl ./owl/owl-files/time/pointing.owl &`
-7. [ ] `kst2 ./kst/tim/<any_file_of_interest>.kst &`
+    3. The dancing avocado will be unhappy unless a rawfile is being updated by `groundhog`
+5. [ ] `sudo ./cow/cow`
+    1. If there is a pop-up window, enter the IP of the FC you want to command, typically `192.168.1.3` (fc1)
+    2. Click "OK"
+    3. This will hang unless the FC is pingable and is running the `blastcmd` daemon
+    4. Otherwise, if the `blastcmd` daemon is already running, the `cow` window will open.
+6. [ ] `./owl/owl ./owl/owl-files/tim/tim2024.owl &`
+7. [ ] `./owl/owl ./owl/owl-files/tim/motor_controller_status.owl &`
+8. [ ] `./owl/owl ./owl/owl-files/tim/pointing.owl &`
+9. [ ] `kst2 ./kst/tim/<any_file_of_interest>.kst &`
     1. Repeat for any other `kst` files
 
 The next scripts are optional.
 
-8. [ ] `attitude_vis`: animated gondola model
+10. [ ] `attitude_vis`: animated gondola model
     1. Activate `conda` environment with packages to display animated gondola model: `conda activate ecm`
     2. `cd ~/evanmayer/vis/`
     3. `./start_vis.sh`
-9. [ ] `scan_rate_vis`: rotary displays of Az/El
+11. [ ] `scan_rate_vis`: rotary displays of Az/El
     1. If not already done, activate `conda` environment with packages to display animated gondola model: `conda activate ecm`
     2. `cd ~/evanmayer/vis/`
     3. `python3 ./scan_rate_vis.py`
