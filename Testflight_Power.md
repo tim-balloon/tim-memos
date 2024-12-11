@@ -89,7 +89,7 @@ As the day progressed, we remained in this ballpark power production. For the ma
 
 ![Power vs. Time](./files/img/power_vs_time.png)
 
-For the science flight, we assume an average achieved power production of 73 W per module flown, and 12 modules, for a total power output of 880 W. For an optimistic number, we may take the peak power production per module (174 W) above.
+For the science flight, we assume an average achieved power production of 73 W per module flown, and 12 modules, for a total power output of 876 W. For an optimistic number, we may take the peak power production per module (174 W) above.
 
 * **Estimate: 876 W**
 * **Theoretical Maximum: 2088 W**
