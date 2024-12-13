@@ -1,4 +1,4 @@
-Evan C. Mayer
+Evan C. Mayer in consultation with Ian Lowe
 
 2024-12-09
 
@@ -30,11 +30,11 @@ The CC communicates status information to the in-charge flight computer via the 
 
 ### Batteries
 
-TIM flies banks of Odyssey [ODS-AGM42L](https://www.batterymart.com/p-odyssey-pc1200-battery.html?srsltid=AfmBOoqhsSQc0bYXbPRaWaNtPGrAPS_95PNpe5s3wGVoO3FU4nBCS7o8) Extreme Powersport (PC1200) batteries, serialized to 28 V. The actual voltage is slightly higher than 28 V when fully charged and under no load. These batteries are a dry cell sealed design, making them user-friendly for gondolas and giving them a good range of temperature tolerance (-40 - 45 C).
+TIM flies banks of Odyssey [ODS-AGM42L](https://www.batterymart.com/p-odyssey-pc1200-battery.html?srsltid=AfmBOoqhsSQc0bYXbPRaWaNtPGrAPS_95PNpe5s3wGVoO3FU4nBCS7o8) Extreme Powersport (PC1200) batteries, serialized to 28 V. The actual voltage is slightly higher than 28 V when fully charged and under no load. These batteries are a dry cell sealed design, making them user-friendly for gondolas, capable of international air/sea shipping, and giving them a good range of temperature tolerance (-40 - 45 C).
 
 ### Boat Switch
 
-The boat switch (a marine switch used to swap boat power between shore and batteries) determines whether the batteries are connected to ground power (a high-current AC-DC converter known as a [SkyRC eFUEL](https://www.nitroplanes.com/26p-efuel-60a.html?srsltid=AfmBOoqrKxHNxqv5lNJIscahAd5qj-hf11nKkdpvRlX0-X6SGJWTyNbA)) or the charge controller. When ground power is selected, the batteries are charged or kept topped up according to the voltage across the eFUEL terminals. When the charge controller is selected, battery voltage is applied to the charge controller, turning it on.
+The boat switch (a [marine switch](https://newwiremarine.com/product/blue-sea-11003-hd-off-1-2/?gad_source=1&gclid=Cj0KCQiA0--6BhCBARIsADYqyL-15_ljfQYEJTtJKGStJYx_gVvEirvHOQDogjU1jRKn_gkkwiDQ4XsaAmNYEALw_wcB), Blue Sea 3-position heavy duty series, used to swap boat power between shore and batteries) determines whether the batteries are connected to ground power (a high-current AC-DC converter known as a [SkyRC eFUEL](https://www.nitroplanes.com/26p-efuel-60a.html?srsltid=AfmBOoqrKxHNxqv5lNJIscahAd5qj-hf11nKkdpvRlX0-X6SGJWTyNbA)), the charge controller, or disconnected entirely. When ground power is selected, the batteries are charged or kept topped up according to the voltage across the eFUEL terminals. When the charge controller is selected, battery voltage is applied to the charge controller, turning it on.
 
 ### Power Breakout Boxes (PBoBs)
 
@@ -116,25 +116,25 @@ For these estimates, we take the operating voltage as measured by preflight chec
 
 | Subsystem | Nominal Voltage (V) | Avg. Current Draw (A) | Avg. Power Draw (W) | Peak Current Draw (A) | Peak Power Draw (W) |
 | --------- | ------------------- | --------------------- | ------------------- | --------------------- | ------------------- |
-| FC1 | 12 | 0.945 | 11.3 | 1.46 | 17.5|
-| FC2 | 12 | 0.956 | 11.5 | 1.55 | 18.6 |
-| Gyros + magnetometers | 12 | 0.904 | 10.8 | 1.38 | 16.6 |
-| SC1 | 12 | 0.95 | 11.4 | 1.58 | 19.0 |
-| SC2 | 12 | 0.95 | 10.9 | 1.41 | 17.0 |
-| GPS | 5 | 0.78 | 3.9 | 1.31 | 6.54 |
-| Warm Thermometry | 5 | 0.64 | 3.2 | 1.19 | 5.96 |
-| Reaction Wheel Motor | 48 | 0.62 | 29.6 | 2.83 | 136 |
-| Elevation Motor | 28 | 0.58 | 16.3 | 1.10 | 30.9 |
-| Pivot Motor | 28 | 0.78 | 21.7 | 3.43 | 96.0 |
-| Outer Frame Ethernet Switch + EtherCAT Switch + CC switch + RFSoC | 28 | 0.95 | 26.6 | 1.49 | 41.7 |
-| Inner Frame Ethernet Switch | 28 | 0.59 | 16.6 | 1.22 | 34.2 |
-| HDD Power Box | 28 | 0.86 | 24.1 | 1.84 | 51.6 |
-| Actuator Bus (Lock Pin) | 28 | 0.55 | 15.5 | 1.10 | 30.9 |
-| Pinhole Sun Sensor Array | 28 | 0.57 | 16.1 | 1.12 | 31.4 |
-| Inclinometers | 12 | 0.55 | 6.57 | 1.08 | 13.0 |
-| Watchdog | 12 | -0.10 | 2.49 | 1.03 | 12.3 |
+| FC1 | 12 | 2.224 | 26.691 | 4.795 | 57.538 |
+| FC2 | 12 | 2.278 | 27.337 | 5.262 | 63.143 |
+| Gyros + magnetometers | 12 | 2.018 | 24.218 | 4.394 | 52.729 |
+| SC1 | 12 | 2.234 | 26.817 | 5.421 | 65.055 |
+| SC2 | 12 | 2.057 | 24.695 | 4.561 | 54.736 |
+| GPS | 5 | 1.401 | 7.006 | 4.039 | 20.196 |
+| Warm Thermometry | 5 | 0.690 | 3.466 | 3.462 | 17.308 |
+| Reaction Wheel Motor | 48 | 0.582 | 29.544 | 11.674 | 560.347 |
+| Elevation Motor | 28 | 0.414 | 12.217 | 3.010 | 84.292 |
+| Pivot Motor | 28 | 1.382 | 38.993 | 14.640 | 409.922 |
+| Outer Frame Ethernet Switch + EtherCAT Switch + CC switch + RFSoC | 28 | 2.246 | 62.897 | 4.946 | 138.497 |
+| Inner Frame Ethernet Switch | 28 | 0.456 | 13.098 | 3.604 | 100.902 |
+| HDD Power Box | 28 | 1.803 | 50.500 | 6.706 | 187.755 |
+| Actuator Bus (Lock Pin) | 28 | 0.265 | 8.240 | 3.010 | 84.292 |
+| Pinhole Sun Sensor Array | 28 | 0.370 | 11.067 | 3.105 | 86.942 |
+| Inclinometers | 12 | 0.237 | 3.250 | 2.903 | 34.838 |
+| Watchdog | 12 | -3.003 | (-)37.362 | (-)2.643 | (-)43.470 |
 
-Total: 238.5 W
+Total: 407.4 W
 
 Clearly, some of these readings are not to be trusted. Aside from the magical electron-creating watchdog, and the fact that many readings are strangely close to either 1 A or 0.5 A, we should not trust a 0.78 A average, 3.43 A peak, ~21 W average figure for the pivot, which for long periods (longer than the 1s report rate of this channel) was required to pull 8-15 A to avoid sticking.
 
@@ -147,22 +147,22 @@ Rather than use the unreliable test flight power draw for non-motor items, we us
 | Item/Subsystem | Typical Power Draw (W) | Max Power Draw (W) | Qty. | Notes |
 | -------------- | ---------------------- | ------------------ | ---- | ----- |
 | ARK-1551-S6A1 | 13.87 | 47.12 | 4 | [Source](https://www.advantech.com/en-us/products/1-2jkbyz/ark-1551/mod_47d30ee7-28b6-41bc-83a1-a7ca416e68cd) |
-| Star camera | 1.6 | 2.8 | 2 | Datasheet |
-| Lens controller | 1 | 8 | 2 | Datasheet |
-| Gyros + mags | 5 + 0.45 | 8 + 0.45 | 2 | Datasheet |
-| GPS | 3 | 8 | 1 | Manual |
-| LabJack (Warm thermometry, ...) | 1 | 3 | 6 |LabJack T7; no loads vs. max supply current; Assume N=6 on gondola |
+| Star camera | 1.6 | 2.8 | 2 | [Datasheet](https://drive.google.com/file/d/1-hMt_GDARWCnhHgPkYrua_I9w-tGb1vb/view?usp=drive_link) |
+| Lens controller | 1 | 8 | 2 | [Datasheet](https://drive.google.com/file/d/1QTqDFwJ0YSH3euocD1H2bZ10lSaUdBHf/view?usp=drive_link) |
+| Gyros + mags | 5 + 0.45 | 8 + 0.45 | 2 | [Gyro](https://drive.google.com/file/d/1w0OHweQ_vV6i7Mvs2NQbZ1pUOWUVqi1W/view?usp=drive_link), [Mag](https://drive.google.com/file/d/1R4N5VisqhgP_3PiquSuZ3dIcwxxVjLiO/view?usp=drive_link) |
+| GPS | 3 | 8 | 1 | [Manual](https://drive.google.com/file/d/1A3NMYLTb6q3nd-kMZywz032boeB2JgPS/view?usp=drive_link) |
+| LabJack (Warm thermometry, ...) | 1 | 3 | 6 | [LabJack T7](https://support.labjack.com/docs/a-5-general-specs-t-series-datasheet); no loads vs. max supply current; Assume N=6 on gondola |
 | Reaction wheel motor | 80 | 715 | 1| See above |
 | Elevation motor | 13 | 153 | 1 | See above|
 | Pivot Motor | 147 | 423 | 1 | See above |
-| Eth switch | 5 | 10 | 12 | Different types, unmanaged vs. managed; assume Planet IGS-10020MT as upper bound, and typ. power half of full load 10 W. Actual estimate is N=6, but we don't know 100% of devices that might need Eth.|
-| RFSoC | 30 | 60 | 4 | HIGHLY dependent on workload. Max value based on mfgr.-supplied power adapter output. |
-| HDDs | 5 | 20 | 2 | Based on per-HDD estimates of 5 W, 20 W and N=16, but assuming only 2 powered at once |
-| Actuator Bus | 12 | 48 | 6 | Stepper motor; Based on 12 V, 1 A typ, 4 A peak draw|
+| Eth switch | 5 | 10 | 12 | Different types, unmanaged vs. managed; assume [Planet IGS-10020MT](https://drive.google.com/file/d/1HrbLbridF7lnuSyysHZMdr8sVLwYXnsW/view?usp=drive_link) as upper bound, and typ. power half of full load 10 W. Actual estimate is N=6, but we don't know 100% of devices that might need Eth. |
+| RFSoC | 30 | 60 | 4 | HIGHLY dependent on workload. Max value based on mfgr.-supplied power adapter output (12 V, 5 A). |
+| HDDs | 5 | 20 | 2 | Based on [per-HDD estimates](https://storedbits.com/hard-drive-power-consumption/) of 5 W, 20 W and N=16, but assuming only 2 powered at once |
+| Actuator Bus | 12 | 48 | 6 | Stepper motor; Based on 12 V, 1 A typ, 4 A peak draw |
 | PSS Array | - | - | 8 | Hamamatsu S5991-01 & supporting circuitry negligible |
-| Inclinometer | 1 | 2 | 2 | Based on 12 V, 0.06 A typ., 36 V, 0.06 A max |
+| Inclinometer | 1 | 2 | 2 | [Based on](https://drive.google.com/file/d/10ChtXmdWUErvpyOBuorVDQwOOIAsjL1l/view?usp=drive_link) 12 V, 0.06 A typ., 36 V, 0.06 A max |
 | Watchdog | 1 | 1 | 1 | Guess; basically in the noise |
-| Charge controller | 1.35 | 2.7 | 2 | Self-consumption |
+| Charge controller | 1.35 | 2.7 | 2 | [Self-consumption](https://drive.google.com/file/d/1dru76f3ICAz15AmSEqMkE19wloMXTp-G/view?usp=drive_link) |
 | Cold thermometry | 3.75 | 10 | 1 | [Simon Tartakovsky](https://timballoon.slack.com/archives/CM2J8SWCT/p1733844639912629?thread_ts=1733842232.064579&cid=CM2J8SWCT) | 
 | Fridge | 1 | 3 | | Ian guess "a few". Fridge cycle probably takes intermittent <1 W. |
 | Action cameras | 2.8 | 5 | 3 | [Video recording, WiFi off](https://cam-do.com/pages/power-consumption-by-gopro-camera-model) |
@@ -174,11 +174,11 @@ Rather than use the unreliable test flight power draw for non-motor items, we us
 
 We have 4 batteries, two parallel sets of two in series, for a nominal voltage of ~28 V (14 + 14). When batteries are connected in series, the capacity stays the same, but the voltage increases. When batteries are connected in parallel, their capacities add, so the battery array behaves like a 28 V, 84 A hr battery.
 
-The manufacturer considers discharging to 80% a "deep cycle", [claiming](https://www.batterymart.com/p-odyssey-pc1200-battery.html?utm_source=google&utm_medium=cpc&utm_campaign=18144606429&gad_source=1&gclid=Cj0KCQiAx9q6BhCDARIsACwUxu7U8NUr7zrgQoIfiUHgb1XryHLgmUqRBOqRwQNKnctmEoWuCiB9eOQaAuvgEALw_wcB) "400 cycles at 80% depth of discharge". We take this as the "drained" state. They also claim "The highest recharge efficiency of any sealed lead battery on the market - capable of 100% recharge in 4 - 6 hours," so our estimate should jive with this.
+The manufacturer considers discharging 80% of the capacity a "deep cycle", [claiming](https://www.batterymart.com/p-odyssey-pc1200-battery.html?utm_source=google&utm_medium=cpc&utm_campaign=18144606429&gad_source=1&gclid=Cj0KCQiAx9q6BhCDARIsACwUxu7U8NUr7zrgQoIfiUHgb1XryHLgmUqRBOqRwQNKnctmEoWuCiB9eOQaAuvgEALw_wcB) "400 cycles at 80% depth of discharge". We take this as the "drained" state. They also claim "The highest recharge efficiency of any sealed lead battery on the market - capable of 100% recharge in 4 - 6 hours," so our estimate should jive with this.
 
 The time required to restore the missing capacity, assuming perfect charging efficiency, is
 
-$$ \frac{84~\textrm{A hr} \cdot 0.2}{\eta_{charge} I_{charge}}$$
+$$ \frac{84~\textrm{A hr} \cdot 0.8}{\eta_{charge} I_{charge}} $$
 
 for charging current $I_{charge}$ and charging efficiency $\eta_{charge}$. The CC has a maximum output of 60 A, but this is determined by the voltage differential of the battery terminals vs. the CC output. Typical recommendations for charging currents are 10-30% of the A hr capacity (8.4 A), and [typical charging efficiencies](https://www.bogartengineering.com/support/application_notes/rpc_battery_charging_efficiency.html) are 85-90%.
 
@@ -188,14 +188,14 @@ $$ \frac{876~\textrm{W} - 601~\textrm{W}}{28~\textrm{V}} \simeq 9.8~\textrm{A},$
 
 from which we can see that additional solar array headroom or less gondola power consumption gets us additional recharge ability.
 
-$$ \frac{84~\textrm{A hr} \cdot 0.2}{0.85 \cdot 9.8~\textrm{A}} = 2~\textrm{hr}$$
+$$ \frac{84~\textrm{A hr} \cdot 0.2}{0.85 \cdot 9.8~\textrm{A}} = 8.1~\textrm{hr}$$
 
-> **NOTE:** It's not immediately clear to me what the MPPT logic of the CC will do in the situation where the gondola current draw and our desire to recharge the batteries exceeds the ideal current for MPPT tracking; presumably the CC battery voltage target of 28.5 V takes precedence when we are below this voltage and have available power.
+> **NOTE:** It's not immediately clear to me what the MPPT logic of the CC will do in the situation where the gondola current draw and our desire to recharge the batteries exceeds the ideal current for MPPT tracking.
 
 ## Conclusion
 
-As a pessimistic estimate, we have ~275 W of excess power. From a power perspective, this would enable us to fly an extra computer (4 cores/8 threads, 1.6 GHz turbo to 4.1 GHz, up to 32 GB RAM) to perform onboard mapmaking at a penalty of ~5-17% of our excess capacity. Heat dissipation is another factor to consider.
+As a pessimistic estimate, we have **~275 W of excess power**. From a power perspective, this would enable us to fly an extra computer (4 cores/8 threads, 1.6 GHz turbo to 4.1 GHz, up to 32 GB RAM) to perform onboard mapmaking at a penalty of ~5-17% of our excess capacity. Heat dissipation is another factor to consider.
 
-The tradeoff in adding more devices is that having sufficient power headroom allows the CC to charge drained batteries faster. For a given wattage from the panels, the CC must sink the current draw of all gondola subsystems and some additional current to restore battery charge.
+The tradeoff in adding more devices is that having sufficient power headroom allows the CC to charge drained batteries faster. For a given wattage from the panels, the CC must sink the current draw of all gondola subsystems and some additional current to restore battery charge. Additional charging capacity allows us to perform more frequent excursions from the optimal solar charging angle (designed for dwelling on our main science field), to visit calibration sources or other targets. Excess battery capacity also allows us to worry less about discharging batteries to dangerous levels during launch attempts, recover to full power once at float, and have tolerance to control problems that would take us away from the optimal charging orientation.
 
-For these reasons, we recommend limiting the addition of a "science coprocessor" PC for inflight mapmaking to nothing more powerful than the ARK-1551. We also recommend exploring the possibility of flying auxiliary solar arrays in different orientations to augment the solar power generation and provide more angular coverage.
+For these reasons, we recommend limiting the addition of a "science coprocessor" PC for inflight mapmaking to nothing more powerful than the ARK-1551. We also recommend exploring the possibility of flying auxiliary solar arrays in different orientations to augment the solar power generation and provide more angular coverage. We also recommend more than 4 batteries to boost the battery array capacity.
