@@ -194,7 +194,7 @@ $$ \frac{84~\textrm{A hr} \cdot 0.2}{0.85 \cdot 9.8~\textrm{A}} = 8.1~\textrm{hr
 
 ## Conclusion
 
-As a pessimistic estimate, we have **~275 W of excess power**. From a power perspective, this would enable us to fly an extra computer (4 cores/8 threads, 1.6 GHz turbo to 4.1 GHz, up to 32 GB RAM) to perform onboard mapmaking at a penalty of ~5-17% of our excess capacity. Heat dissipation is another factor to consider.
+As a pessimistic estimate, we have **~275 W of excess power**. From a power perspective, this would enable us to fly an extra computer (4 cores/8 threads, 1.6 GHz turbo to 4.1 GHz, 32 GB RAM) to perform onboard mapmaking at a penalty of ~5-17% of our excess capacity. Heat dissipation is another factor to consider.
 
 The tradeoff in adding more devices is that having sufficient power headroom allows the CC to charge drained batteries faster. For a given wattage from the panels, the CC must sink the current draw of all gondola subsystems and some additional current to restore battery charge. Additional charging capacity allows us to perform more frequent excursions from the optimal solar charging angle (designed for dwelling on our main science field), to visit calibration sources or other targets. Excess battery capacity also allows us to worry less about discharging batteries to dangerous levels during launch attempts, recover to full power once at float, and have tolerance to control problems that would take us away from the optimal charging orientation.
 
