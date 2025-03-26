@@ -115,12 +115,23 @@ secondary = o3d.t.geometry.TriangleMesh.from_legacy(secondary)
 
 # scoop
 min_el = 20. * np.pi / 180.
-dh = -1 # shorten the scoop?
+dh = -1.5 # shorten the scoop?
 h = 2. * r_out / np.arctan(min_el) + dh
 scoop_back = 0
 scoop_front = h
 print(f'scoop len: {h}')
+
+# some useful octagon properties
+# https://mathworld.wolfram.com/RegularOctagon.html
 r_scoop = 1.1 # octagon circumradius
+a_scoop = 2. * r_scoop / np.sqrt(4. + 2. * np.sqrt(2.)) # octagon side length
+inradius = 0.5 * (1. + np.sqrt(2.)) * a_scoop # octagon normal height
+side_halfangle = np.arctan(a_scoop / (2. * inradius))
+midpoint_x = inradius * np.cos(2. * side_halfangle)
+midpoint_y = inradius * np.sin(2. * side_halfangle)
+vertex_x = r_scoop * np.cos(side_halfangle)
+vertex_y = r_scoop * np.sin(side_halfangle)
+
 scoop = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop, height=h, resolution=8, split=4)
 scoop.translate([0, 0, h/2])
 scoop = o3d.t.geometry.TriangleMesh.to_legacy(scoop)
@@ -138,72 +149,78 @@ scoop_clip_nhat = [0, y_proj, z_proj]
 scoop_clip_nhat /= np.linalg.norm(scoop_clip_nhat)
 scoop_clip_nhat *= -1
 scoop = scoop.clip_plane(point=[0,-r_scoop,h+1.2-dh], normal=scoop_clip_nhat)
+# clip off the top to prepare for louvers
+scoop = scoop.clip_plane(point=[0, vertex_y, 0], normal=[0, -1, 0])
+
 # color
 scoop = o3d.t.geometry.TriangleMesh.to_legacy(scoop)
 scoop.paint_uniform_color([0.7, 0.7, 0.9])
 scoop = o3d.t.geometry.TriangleMesh.from_legacy(scoop)
 
 # create louvers for top panels
-# some useful octagon properties
-# https://mathworld.wolfram.com/RegularOctagon.html
-a_scoop = 2. * r_scoop / np.sqrt(4. + 2. * np.sqrt(2.)) # octagon side length
-inradius = 0.5 * (1. + np.sqrt(2.)) * a_scoop # octagon normal height
-side_halfangle = np.arctan(a_scoop / (2. * inradius))
-midpoint_x = inradius * np.cos(2. * side_halfangle)
-midpoint_y = inradius * np.sin(2. * side_halfangle)
-# corrugation unit cell: full cycle
-#      /^\        /
-#     / | \      /
-#    /  h  \    /
-#   /   |   \  /
-#  /____v___0\/
-#       |<-b->|
-corrugation_angle = 70. * np.pi / 180.
-corrugation_height = (1. / 12.) *.3048 # assume cut wedges out of ~1" thick insulation foam and mylarized
+# corrugation unit cell: tilted plane
+# ^\
+# | \
+# |  \
+# h   \
+# |    \
+# v____0\
+# |<-b->|
+
+corrugation_angle = 27.6 * np.pi / 180. # scoop exclusion angle 30 * np.pi / 180.
+corrugation_height = (3. / 12.) * .3048 # assume cut wedges out of ~1" thick insulation foam and mylarized
 corrugation_base = corrugation_height / np.tan(corrugation_angle)
 louver_length = h_sec_vertex # along boresight
-N_triangles = np.round(louver_length / (corrugation_base * 4) ).astype(int)
-all_pts = []
-for i in range(N_triangles):
-    start = (i * 4) * corrugation_base
-    pts = [
-        [0, 0, start], # trough 1
-        [0, -corrugation_height,  start + corrugation_base], # peak 1
-        [0, 0, start + 2 * corrugation_base], # trough 2
-        [0, -corrugation_height, start + 3 * corrugation_base], # peak 2
-    ]
-    all_pts += pts
-all_pts = np.array(all_pts)
-indexes = range(4 * N_triangles)
-pairs = np.array(list(zip(indexes[:-1], indexes[1:])))
-louver_lineset = o3d.t.geometry.LineSet(all_pts, pairs)
-
-louver = louver_lineset.extrude_linear([1, 0, 0], a_scoop)
-# color
+corrugation_thickness = (.5 / 12.) * .3048
+corrugation_width = a_scoop * 1.2
+N_vanes = np.round(louver_length / (corrugation_base)).astype(int)
+# proto-louver
+corrugation_l = np.sqrt(corrugation_height**2 + corrugation_base**2)
+pts = np.array([
+    [0, 0, 0],
+    [0, 0, corrugation_l],
+    [0, corrugation_thickness, corrugation_l + 2. * corrugation_thickness],
+    [0, corrugation_thickness, corrugation_l],
+    [0, corrugation_thickness, 0],
+])
+pairs = np.array([[0,4], [4,3], [3,2], [2,1], [1,0]]) # order dictates normals
+louver_lineset = o3d.t.geometry.LineSet(pts, pairs)
+louver = louver_lineset.extrude_linear([1, 0, 0], corrugation_width) # fudge some extra length to cover corners on top
 louver = o3d.t.geometry.TriangleMesh.to_legacy(louver)
+R = louver.get_rotation_matrix_from_axis_angle([-corrugation_angle, 0, 0])
+louver.rotate(R)
 louver.paint_uniform_color([0.9, 0.3, 0.9])
 louver = o3d.t.geometry.TriangleMesh.from_legacy(louver)
+
 # positioning
+louvers = []
+
 louver_top = louver.clone()
-louver_top.translate([-a_scoop/2, inradius, .15])
+louver_top.translate([-corrugation_width/2, inradius, .15])
 louver_top = o3d.t.geometry.TriangleMesh.to_legacy(louver_top)
 R = louver_top.get_rotation_matrix_from_axis_angle([0, 0, np.pi])
 louver_top.rotate(R)
 louver_top = o3d.t.geometry.TriangleMesh.from_legacy(louver_top)
 
 louver_port = louver.clone()
-louver_port.translate([-a_scoop/2 + midpoint_x, midpoint_y, .15])
+louver_port.translate([-corrugation_width/2 + midpoint_x, midpoint_y, .15])
 louver_port = o3d.t.geometry.TriangleMesh.to_legacy(louver_port)
 R = louver_port.get_rotation_matrix_from_axis_angle([0, 0, np.pi - (np.pi / 180.) * (360. / 8.)])
 louver_port.rotate(R)
 louver_port = o3d.t.geometry.TriangleMesh.from_legacy(louver_port)
 
 louver_star = louver.clone()
-louver_star.translate([-a_scoop/2 - midpoint_x, midpoint_y, .15])
+louver_star.translate([-corrugation_width/2 - midpoint_x, midpoint_y, .15])
 louver_star = o3d.t.geometry.TriangleMesh.to_legacy(louver_star)
 R = louver_star.get_rotation_matrix_from_axis_angle([0, 0, np.pi + (np.pi / 180.) * (360. / 8.)])
 louver_star.rotate(R)
 louver_star = o3d.t.geometry.TriangleMesh.from_legacy(louver_star)
+
+for i in range(N_vanes):
+    for lv in [louver_top, louver_port, louver_star]:
+        louver_new = lv.clone()
+        louver_new.translate([0, 0, i * corrugation_base])
+        louvers.append(louver_new)
 
 # create a central baffle
 # h_snoot = .18
@@ -227,20 +244,21 @@ cryostat_window.paint_uniform_color([1.0, 0.0, 0.0])
 cryostat_window = o3d.t.geometry.TriangleMesh.from_legacy(cryostat_window)
 
 # prepare meshes for rendering and calculation
-meshes = [scoop, louver_top, louver_port, louver_star, primary, secondary, cryostat_window]
+meshes = [scoop, primary, secondary, cryostat_window] + louvers
 [m.compute_vertex_normals() for m in meshes]
 [m.compute_triangle_normals() for m in meshes]
 
 # convert to legacy to flip some normals
-meshes = [o3d.t.geometry.TriangleMesh.to_legacy(m) for m in meshes]
-scoop, louver_top, louver_port, louver_star, primary, secondary, cryostat_window = meshes
+meshes = [o3d.t.geometry.TriangleMesh.to_legacy(m) for m in [scoop, primary]]
+scoop, primary, = meshes
 for i in range(len(scoop.triangles)):
     scoop.triangles[i] = scoop.triangles[i][::-1]
 for i in range(len(primary.triangles)):
     primary.triangles[i] = primary.triangles[i][::-1]
 # convert back to tensor representation to do ray tracing
-meshes = [o3d.t.geometry.TriangleMesh.from_legacy(m) for m in meshes]
-scoop, louver_top, louver_port, louver_star, primary, secondary, cryostat_window = meshes
+meshes = [o3d.t.geometry.TriangleMesh.from_legacy(m) for m in [scoop, primary]]
+scoop, primary = meshes
+meshes = [scoop, primary, secondary, cryostat_window] + louvers
 
 
 # -----------------------------------------------------------------------------
@@ -251,9 +269,9 @@ scene = o3d.t.geometry.RaycastingScene()
 mesh_ids = [scene.add_triangles(m) for m in meshes]
 geom_dict = {mesh_ids[i]: m for i, m in enumerate(meshes)}
 mesh_ids = [-1] + mesh_ids # support for a numbered surface at inf
-mesh_names = ['inf', 'scoop', 'louver_top', 'louver_port', 'louver_star', 'primary', 'secondary', 'cryostat_window']
+mesh_names = ['inf', 'scoop', 'primary', 'secondary', 'cryostat_window'] + [f'louvers{i}' for i in range(len(louvers))]
 mesh_id_to_name = {mesh_ids[i]: mesh_name for i, mesh_name in enumerate(mesh_names)}
-absorber_meshes = [cryostat_window, ]
+absorber_meshes = [cryostat_window,]
 
 # on-axis, sparse
 # r_ray = r_out - 1e-6
@@ -287,16 +305,16 @@ absorber_meshes = [cryostat_window, ]
 # rays[:,5] = -1
 
 # above rad, Gaussian bundle, dense
-# N_rays = 500
-# rays = o3d.core.Tensor(
-#     np.zeros((N_rays, 6)),
-#     dtype=o3d.core.Dtype.Float32
-# )
-# xy_coord = np.random.normal(scale=(.35,.35), loc=(0,0), size=(N_rays, 2))
-# rays[:,0] = xy_coord[:,0]
-# rays[:,1] = 0
-# rays[:,2] = 1.2 + xy_coord[:,1]
-# rays[:,4] = -1
+N_rays = 500
+rays = o3d.core.Tensor(
+    np.zeros((N_rays, 6)),
+    dtype=o3d.core.Dtype.Float32
+)
+xy_coord = np.random.normal(scale=(.35,.35), loc=(0,0), size=(N_rays, 2))
+rays[:,0] = xy_coord[:,0]
+rays[:,1] = 10
+rays[:,2] = 1.2 + xy_coord[:,1]
+rays[:,4] = -1
 
 # off-axis grid
 # assumptions:
@@ -353,17 +371,49 @@ absorber_meshes = [cryostat_window, ]
 # set up a grid of origin points in relevant angular ranges
 # the nominal lowest el is +20, and Earth limb may become important by +6.
 # launch rays from a relative angle below the assembly
-earth_limb_angle = (-20. + np.linspace(0, .1, num=1, endpoint=True)) * np.pi / 180.
-ray_z = 10
-ray_ys = ray_z * np.tan(earth_limb_angle)
-ray_xs = np.linspace(0, 10, num=10, endpoint=True)
-XX, YY = np.meshgrid(ray_xs, ray_ys)
-xflat = XX.flatten()
-yflat = YY.flatten()
-ray_bundle_origin = np.vstack([xflat, yflat, np.ones_like(xflat) * ray_z]).T
-aimpoint = np.array([0, 0, 0]).T
-v_aim = aimpoint - ray_bundle_origin
-v_aim /= np.atleast_2d(np.linalg.norm(v_aim, axis=1)).T
+# earth_limb_angle = (-20. + np.linspace(0, .1, num=1, endpoint=True)) * np.pi / 180.
+# ray_z = 10
+# ray_ys = ray_z * np.tan(earth_limb_angle)
+# ray_xs = np.linspace(-10, 10, num=20, endpoint=True)
+# XX, YY = np.meshgrid(ray_xs, ray_ys)
+# xflat = XX.flatten()
+# yflat = YY.flatten()
+# ray_bundle_origin = np.vstack([xflat, yflat, np.ones_like(xflat) * ray_z]).T
+# aimpoint = np.array([0, 0, 0]).T
+# v_aim = aimpoint - ray_bundle_origin
+# v_aim /= np.atleast_2d(np.linalg.norm(v_aim, axis=1)).T
+
+# # shoot a bundle of rays, each rotated by a small amount relative to the main
+# # aim vector
+# theta_half_angle = np.pi/4
+# phi_half_angle = np.pi/4
+# N_bundle_side = 200
+# thetas = np.linspace(-theta_half_angle, theta_half_angle, num=N_bundle_side)
+# phis = np.linspace(-phi_half_angle, phi_half_angle, num=N_bundle_side)
+# # rays_per_origin = 100
+# ray_list = []
+# for i in range(len(xflat)):
+#     print(f'{(i+1) / len(xflat):.2f}', end='\r')
+#     # current angle of the aim vector
+#     theta = np.arctan2(v_aim[i,1], v_aim[i,0])
+#     phi = np.arccos(v_aim[i,2])
+#     # thetas = rng.uniform(-theta_half_angle, theta_half_angle, rays_per_origin)
+#     # phis = rng.uniform(-phi_half_angle, phi_half_angle, rays_per_origin)
+#     ddtheta, ddphi = np.meshgrid(thetas, phis)
+#     dtheta = ddtheta.flatten()
+#     dphi = ddphi.flatten()
+#     rots = Rotation.from_euler('YXZ', np.vstack([dtheta, dphi, np.zeros_like(dphi)]).T)
+#     for rot in rots:
+#         v_aim_new = rot.apply(v_aim[i,:])
+#         # add the bundle of rays to the total list
+#         this_ray = [xflat[i], yflat[i], ray_z, v_aim_new[0], v_aim_new[1], v_aim_new[2]]
+#         ray_list.append(this_ray)
+
+# rays = o3d.core.Tensor(
+#     ray_list,
+#     dtype=o3d.core.Dtype.Float32
+# )
+# N_rays = rays.numpy().shape[0]
 
 # fig, ax = plt.subplots(subplot_kw={'projection':'3d'})
 # ax.quiver(
@@ -379,38 +429,6 @@ v_aim /= np.atleast_2d(np.linalg.norm(v_aim, axis=1)).T
 # ax.set_xlabel('x')
 # ax.set_title('Unperturbed ray aimings')
 # plt.show()
-
-# shoot a bundle of rays, each rotated by a small amount relative to the main
-# aim vector
-theta_half_angle = np.pi/4
-phi_half_angle = np.pi/4
-N_bundle_side = 50
-thetas = np.linspace(-theta_half_angle, theta_half_angle, num=N_bundle_side)
-phis = np.linspace(-phi_half_angle, phi_half_angle, num=N_bundle_side)
-# rays_per_origin = 100
-ray_list = []
-for i in range(len(xflat)):
-    print(f'{(i+1) / len(xflat):.2f}', end='\r')
-    # current angle of the aim vector
-    theta = np.arctan2(v_aim[i,1], v_aim[i,0])
-    phi = np.arccos(v_aim[i,2])
-    # thetas = rng.uniform(-theta_half_angle, theta_half_angle, rays_per_origin)
-    # phis = rng.uniform(-phi_half_angle, phi_half_angle, rays_per_origin)
-    ddtheta, ddphi = np.meshgrid(thetas, phis)
-    dtheta = ddtheta.flatten()
-    dphi = ddphi.flatten()
-    rots = Rotation.from_euler('YXZ', np.vstack([dtheta, dphi, np.zeros_like(dphi)]).T)
-    for rot in rots:
-        v_aim_new = rot.apply(v_aim[i,:])
-        # add the bundle of rays to the total list
-        this_ray = [xflat[i], yflat[i], ray_z, v_aim_new[0], v_aim_new[1], v_aim_new[2]]
-        ray_list.append(this_ray)
-
-rays = o3d.core.Tensor(
-    ray_list,
-    dtype=o3d.core.Dtype.Float32
-)
-N_rays = rays.numpy().shape[0]
 
 # fig, ax = plt.subplots(subplot_kw={'projection':'3d'})
 # rnp = rays.numpy()
@@ -511,7 +529,7 @@ for path in paths:
         surf_id = path.last_surface_id
     last_surfaces_hit.append(surf_id)
     # for ezest plotting, only consider rays that entered the forbidden zone
-    # if surf_id != mesh_ids[-1]:
+    # if surf_id != mesh_ids[4]:
     #     continue
     # unwind all paths into lines and paint
     # BUG: FIXME: some line segments are grey. why?
