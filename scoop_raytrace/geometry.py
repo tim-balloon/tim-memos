@@ -4,7 +4,7 @@ import open3d as o3d
 
 
 # sometimes useful to downsample primary/secondary meshes for faster debugging
-MESH_RES_FACTOR = .5
+MESH_RES_FACTOR = .2
 
 # primary
 f = 1.6
@@ -49,8 +49,11 @@ def get_geometry():
     mirror_profile = o3d.t.geometry.LineSet(primary_profile_points, primary_profile_pairs)
     primary = mirror_profile.extrude_rotation(360., [0, 0, 1], resolution=int(500 * MESH_RES_FACTOR))
     # color
+    primary.compute_vertex_normals()
+    primary.compute_triangle_normals()
     primary = o3d.t.geometry.TriangleMesh.to_legacy(primary)
     primary.paint_uniform_color([0.5, 0.8, 0.5])
+    primary.orient_triangles()
     primary = o3d.t.geometry.TriangleMesh.from_legacy(primary)
 
     # secondary mirror
@@ -68,8 +71,11 @@ def get_geometry():
     secondary = sec_mirror_profile.extrude_rotation(360., [0, 0, 1], resolution=int(500 * MESH_RES_FACTOR))
     secondary.translate([0, 0, h_sec_vertex])
     # color
+    secondary.compute_vertex_normals()
+    secondary.compute_triangle_normals()
     secondary = o3d.t.geometry.TriangleMesh.to_legacy(secondary)
-    secondary.paint_uniform_color([0.7, 0.5, 0.7])
+    secondary.paint_uniform_color([0.3, 0.3, 0.8])
+    secondary.orient_triangles()
     secondary = o3d.t.geometry.TriangleMesh.from_legacy(secondary)
 
     # scoop
@@ -103,9 +109,12 @@ def get_geometry():
     rear_shield_outside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop+scoop_thickness, height=h_shield, resolution=8, split=4)
     rear_shield = rear_shield_outside.boolean_difference(rear_shield_inside)
     rear_shield.translate([0, 0, -h_shield/2 + .18])
+    rear_shield.compute_vertex_normals()
+    rear_shield.compute_triangle_normals()
     rear_shield = o3d.t.geometry.TriangleMesh.to_legacy(rear_shield)
     rear_shield.rotate(R)
     rear_shield.paint_uniform_color([0.3, 0.3, 0.3])
+    rear_shield.orient_triangles()
     rear_shield = o3d.t.geometry.TriangleMesh.from_legacy(rear_shield)
 
     # clip off the front and back faces of the scoop
@@ -123,8 +132,11 @@ def get_geometry():
     scoop = scoop.clip_plane(point=[0, vertex_y, 0], normal=[0, -1, 0])
 
     # color
+    scoop.compute_vertex_normals()
+    scoop.compute_triangle_normals()
     scoop = o3d.t.geometry.TriangleMesh.to_legacy(scoop)
     scoop.paint_uniform_color([0.7, 0.7, 0.9])
+    scoop.orient_triangles()
     scoop = o3d.t.geometry.TriangleMesh.from_legacy(scoop)
 
     # create louvers for top panels
@@ -148,10 +160,13 @@ def get_geometry():
     pairs = np.array([[0,4], [4,3], [3,2], [2,1], [1,0]]) # order dictates normals
     louver_lineset = o3d.t.geometry.LineSet(pts, pairs)
     louver = louver_lineset.extrude_linear([1, 0, 0], corrugation_width) # fudge some extra length to cover corners on top
+    louver.compute_vertex_normals()
+    louver.compute_triangle_normals()
     louver = o3d.t.geometry.TriangleMesh.to_legacy(louver)
     R = louver.get_rotation_matrix_from_axis_angle([-corrugation_angle, 0, 0])
     louver.rotate(R)
     louver.paint_uniform_color([0.9, 0.3, 0.9])
+    louver.orient_triangles()
     louver = o3d.t.geometry.TriangleMesh.from_legacy(louver)
 
     # positioning
@@ -198,7 +213,7 @@ def get_geometry():
     # snoot = o3d.t.geometry.TriangleMesh.from_legacy(snoot)
 
     # a catcher disc: every ray that makes it to this plane is considered naughty, and a no-no
-    cryostat_window = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_in, height=0.1, resolution=50, split=1)
+    cryostat_window = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_in, height=0.05, resolution=50, split=1)
     cryostat_window.translate([0, 0, -0.3])
     # color
     cryostat_window = o3d.t.geometry.TriangleMesh.to_legacy(cryostat_window)
@@ -207,18 +222,18 @@ def get_geometry():
 
     # prepare meshes for rendering and calculation
     meshes = [scoop, rear_shield, primary, secondary, cryostat_window] + louvers
-
-    # convert to legacy to flip some normals
-    # meshes = [o3d.t.geometry.TriangleMesh.to_legacy(m) for m in [scoop, rear_shield, primary]]
-    # scoop, rear_shield, primary, = meshes
-    # # convert back to tensor representation to do ray tracing
-    # meshes = [o3d.t.geometry.TriangleMesh.from_legacy(m) for m in [scoop, rear_shield, primary]]
-    # scoop, rear_shield, primary = meshes
-    meshes = [scoop, rear_shield, primary, secondary, cryostat_window] + louvers
     [m.compute_vertex_normals() for m in meshes]
     [m.compute_triangle_normals() for m in meshes]
 
     absorber_meshes = [cryostat_window, rear_shield]
+
+    system_hull = scoop.compute_convex_hull().boolean_union(primary.compute_convex_hull())
+    system_hull = system_hull.compute_convex_hull()
+    system_hull = o3d.t.geometry.TriangleMesh.from_legacy(
+        system_hull.to_legacy(),
+        vertex_dtype=o3d.core.float32,
+        triangle_dtype=o3d.core.int32
+    )
 
     mesh_names = [
         'inf',
@@ -240,4 +255,4 @@ def get_geometry():
     # for i, mesh in enumerate(meshes):
     #     print('self-intersecting?', mesh_names[i], o3d.t.geometry.TriangleMesh.to_legacy(mesh).is_self_intersecting())
 
-    return meshes, mesh_names, absorber_meshes
+    return meshes, mesh_names, absorber_meshes, system_hull

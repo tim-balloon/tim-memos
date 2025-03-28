@@ -32,6 +32,7 @@ class RayPath(object):
         self.last_pos = [np.inf, np.inf, np.inf]
         self.color = [0.5, 0.5, 0.5]
         self.lines = []
+        self.terminated = False
 
     def ray_to_line(self, start:o3d.core.Tensor, end:o3d.core.Tensor):
         l = o3d.t.geometry.LineSet(
@@ -42,7 +43,7 @@ class RayPath(object):
         return l
 
     def append(self, ray_start, ray_end, surf_hit_id):
-        self.rays.append(ray_start)
+        self.rays.append(ray_end)
         line = self.ray_to_line(ray_start, ray_end)
         self.lines.append(line) # TODO: refactor to use LineSet properly
         self.n_bounces += 1
@@ -59,11 +60,11 @@ class RayPath(object):
 
 
 print('Creating meshes...')
-meshes, mesh_names, absorber_meshes = geometry.get_geometry()
+meshes, mesh_names, absorber_meshes, system_hull = geometry.get_geometry()
 
 print('Creating ray bundles...')
-# rays, N_rays = ray_sets.angular_sector()
-rays, N_rays = ray_sets.simple_fan([1 - 1e-1, .51 + 1e-1])
+rays, N_rays = ray_sets.angular_sector()
+# rays, N_rays = ray_sets.simple_fan([1 - 1e-1, .75, .51 + 1e-2])
 # rays, N_rays = ray_sets.random_disc(1, 100, [0, 0, 10], [0, 0, -1])
 
 print('Creating scene...')
@@ -75,106 +76,138 @@ mesh_id_to_name = {mesh_ids[i]: mesh_name for i, mesh_name in enumerate(mesh_nam
 
 # store history of each ray
 paths = [RayPath(i) for i in range(N_rays)]
-for i, ray in enumerate(rays):
-    paths[i].append(ray, ray, o3d.t.geometry.RaycastingScene.INVALID_ID)
+for i, path in enumerate(paths):
+    path.append(rays[i], rays[i], o3d.t.geometry.RaycastingScene.INVALID_ID)
 
 # if aluminized mylar/aluminum mirrors have reflection coefficients of
 # ~.99, any ray is down to ~.6 by 50 bounces
+max_consecutive_hits = 3 # indicates a ray may be trapped inside a mesh
 N_bounces = 50
 i_bounce = 0
 print('Tracing rays...')
-while i_bounce <= N_bounces:
-    # cast
+while i_bounce < N_bounces:
+    # build the set of rays to trace
+    valid_rays = []
+    ray_idx_to_path_idx = []
+    for i, path in enumerate(paths):
+        if path.terminated:
+            continue
+        valid_rays.append(path.rays[-1].numpy())
+        ray_idx_to_path_idx.append(i)
+    if not valid_rays:
+        break
+    rays = o3d.core.Tensor(valid_rays, dtype=o3d.core.Dtype.Float32)
+
     ans = scene.cast_rays(rays)
-    print(scene.list_intersections(rays))
-    # prune rays that terminate at infinity
-    hit_mask = np.where(np.isfinite(ans['t_hit'].numpy()))[0]
+
+    distance_finite = np.isfinite(ans['t_hit'].numpy())
+    miss_mask = np.where(~distance_finite)[0]
+    for i in miss_mask:
+        paths[ray_idx_to_path_idx[i]].terminated = True
+    hit_mask = np.where(distance_finite)[0]
     print(
-        f'Bounce {i_bounce} finds {len(hit_mask)} hits\n' +
+        f'Bounce {i_bounce} finds {len(hit_mask)} hits ' +
         f'on surfaces {[mesh_id_to_name[ide] for ide in ans["geometry_ids"].numpy()]}'
     )
-    # compute new ray directions
-    new_ray_list = []
-
-    # if i_bounce == 0:
-    #     plt.plot(ans['t_hit'].numpy())
-    #     plt.show()
-
-    # iterate over all rays that hit a mesh
-    for i_hit in hit_mask:
-        mesh_id_hit = ans["geometry_ids"].numpy()[i_hit]
+    for i in hit_mask:
+        this_ray = rays[i]
+        this_path = paths[ray_idx_to_path_idx[i]]
+        mesh_id_hit = ans["geometry_ids"].numpy()[i]
         mesh_hit = geom_dict[mesh_id_hit]
-        this_ray = rays[i_hit]
-        # make double-sure units of distance are 1m
+        this_path.color = mesh_hit.vertex.colors[0].numpy()
+
+        # make double-sure units of distance are still 1m
         this_ray[v_] = this_ray[v_] / np.linalg.norm(this_ray[v_].numpy())
-        dist = ans['t_hit'][i_hit]
+        dist = ans['t_hit'][i]
         end = this_ray.clone()
-        end[u_] = this_ray[u_] + this_ray[v_] * (dist - 1e-6)
-        # check to see ray does not end up inside a mesh
-        query_point = o3d.core.Tensor([end[u_].numpy()], dtype=o3d.core.Dtype.Float32)
-        signed_dist = scene.compute_signed_distance(query_point).numpy()[0]
-        if signed_dist < 0:
-            print(ans['primitive_uvs'][i_hit])
-            continue
-        adjust_step = 1e-6
-        maxtries = 5e4
-        while (signed_dist < 0) and (maxtries > 0):
-            maxtries -= 1
-            print(
-                f'WARNING: ray {str(this_ray)} found at point ' +
-                f'{end[u_].numpy()}, a distance {signed_dist} inside mesh ' +
-                f'{mesh_id_to_name[mesh_id_hit]}!\nAdjusting ' +
-                f'position by {adjust_step} along ray.'
-            )
-            # adjust position backward along ray
-            dist -= adjust_step
-            end[u_] = this_ray[u_] + this_ray[v_] * dist
-            new_query_point = o3d.core.Tensor([end[u_].numpy()], dtype=o3d.core.Dtype.Float32)
-            signed_dist = scene.compute_signed_distance(new_query_point).numpy()[0]
-        if maxtries < 1:
-            print('|||||||WARNING: failed to adjust ray outside of mesh. Eating ray.')
-            continue
+        end[u_] = this_ray[u_] + this_ray[v_] * dist
 
-        this_path = paths[i_hit]
-        this_path.append(this_ray, end, mesh_id_hit)
-        # terminate if required
+        # terminate if absorbed
         if mesh_hit in absorber_meshes:
-            this_path.color = mesh_hit.vertex.colors[0].numpy()
+            this_path.append(this_ray, end, mesh_id_hit)
+            this_path.terminated = True
             continue
-        
-        # propagate rays to next surface:
-        # get mesh triangle surface normal
-        nhat = ans['primitive_normals'][i_hit].numpy()
-        vhat_new = get_new_direction(this_ray, nhat)
-        # advance the ray position
-        pos_new = this_ray[u_] + this_ray[v_] * dist
-        new_ray = np.concatenate([pos_new.numpy(), vhat_new])
-        new_ray_list.append(list(new_ray))
 
-    # create the new ray bundle
-    rays = o3d.core.Tensor(new_ray_list, dtype=o3d.core.Dtype.Float32)
+        # check to see if ray has ended up inside mesh:
+        # get the projection along triangle surface normal of a vector pointing
+        # from triangle's centroid to intersection's position
+        # assume outward-facing normal, so a point inside has a negative
+        # projection
+        v = mesh_hit.vertex['positions'].numpy()
+        t = mesh_hit.triangle['indices'].numpy()
+        tidx = ans['primitive_ids'].numpy()[i]
+        # triangle vertex centroid
+        centroid = v[t[tidx]].mean(axis=0)
+        # triangle surface normal
+        nhat = mesh_hit.triangle.normals[tidx].numpy()
+        # projection of intersection position along surface normal
+        intersec_vec = end[u_].numpy() - centroid
+        proj = np.dot(intersec_vec, nhat)
+        # fix errant interior intersections by flipping pos along the normal
+        if proj < 0:
+            correction_distance = np.max([1e-7, -2 * proj])
+            corrected_pos = end[u_].numpy() + nhat * correction_distance
+            end[u_] = corrected_pos
+            print(
+                f'WARNING: ray {i} propagated inside mesh ' +
+                f'{mesh_id_to_name[mesh_id_hit]}, flipping pos about mesh ' + 
+                f'normal, a correction of {correction_distance} m.'
+            )
+            # # check your work
+            # intersec_vec = corrected_pos - centroid
+            # proj = np.dot(intersec_vec, nhat)
+            # if proj < 0:
+            #     raise RuntimeError(
+            #         f'Mesh ray eater fix failed! Fixed ray was {proj} ' +
+            #         f'inside mesh {mesh_id_to_name[mesh_id_hit]}!'
+            #     )
+
+        # propagate rays that will be continuing on to next surface
+        vhat_new = get_new_direction(this_ray, nhat)
+        new_ray = np.concatenate([end[u_].numpy(), vhat_new])
+        this_path.append(
+            this_ray,
+            o3d.core.Tensor(
+                new_ray,
+                dtype=o3d.core.Dtype.Float32
+            ),
+            mesh_id_hit
+        )
+
+        surf_ids, counts = np.unique(this_path.surfaces_hit, return_counts=True)
+        if any(counts > max_consecutive_hits):
+            print(
+                f'WARNING: path {ray_idx_to_path_idx[i]} hit a mesh more ' +
+                f'than {max_consecutive_hits} times: ' +
+                f'{this_path.surfaces_hit} Terminating.'
+            )
+            this_path.terminated = True
 
     i_bounce += 1
 
-    # Terminate if necessary
-    if not new_ray_list:
-        print(f'All rays have been terminated after {i_bounce} bounces.')
-        break
+print(f'Simulation terminated after {i_bounce} bounces.')
 
 # -----------------------------------------------------------------------------
 # Rendering + statistics
 # -----------------------------------------------------------------------------
 print('Creating render...')
+hull_scene = o3d.t.geometry.RaycastingScene()
+hull_scene.add_triangles(system_hull)
 last_surfaces_hit = []
 geom = []
+N_incident = 0 # number of rays that entered the structure
 for path in paths:
     surf_id = path.surfaces_hit[-1]
     last_surfaces_hit.append(surf_id)
     # for ezest plotting, only consider rays that entered the forbidden zone
     # if surf_id != mesh_ids[5]:
     #     continue
-    # unwind all paths into lines and paint
-    # BUG: FIXME: some line segments are grey. why?
+    for ray in path.rays:
+        query_point = o3d.core.Tensor([ray[u_].numpy()], dtype=o3d.core.Dtype.Float32)
+        if hull_scene.compute_signed_distance(query_point) < 0:
+            N_incident += 1
+            break
+    # unwind all paths into lines
     path.apply_color(path.color)
     linesets = []
     for l in path.lines:
@@ -188,9 +221,6 @@ triad = o3d.t.geometry.TriangleMesh.from_legacy(triad)
 triad.compute_vertex_normals()
 meshes += [triad,]
 
-# identify surfaces
-# TODO: render text near each surface to label them
-
 # convert back to legacy to render
 meshes = [o3d.t.geometry.TriangleMesh.to_legacy(m) for m in meshes]
 geom += meshes
@@ -198,16 +228,24 @@ o3d.visualization.draw_geometries(geom, mesh_show_wireframe=False)
 
 # plot statistics
 
+o3d.visualization.draw_geometries([o3d.t.geometry.TriangleMesh.to_legacy(system_hull)], mesh_show_wireframe=True)
+
 # fraction of counts per last hit surface
 fig, ax = plt.subplots()
 surf_ids, counts = np.unique(last_surfaces_hit, return_counts=True)
 surf_ids = list(surf_ids)
-if o3d.t.geometry.RaycastingScene.INVALID_ID in surf_ids:
-    surf_ids[surf_ids.index(o3d.t.geometry.RaycastingScene.INVALID_ID)] = -1
+
+xticklabels = []
+for i, id in enumerate(surf_ids):
+    label = mesh_id_to_name[id]
+    xticklabels.append(label)
+    if id == o3d.t.geometry.RaycastingScene.INVALID_ID:
+        surf_ids[i] = -1
+
 ax.bar(surf_ids, counts / N_rays)
 # ax.set_yscale('log')
 ax.set_xticks(surf_ids)
-ax.set_xticklabels([mesh_id_to_name[id] for id in surf_ids])
+ax.set_xticklabels(xticklabels)
 ax.set_title('Ray Fates')
 ax.set_xlabel('ID of Last Surface')
 ax.set_ylabel('Fraction of Total Casted Rays')
@@ -218,7 +256,7 @@ fig, ax = plt.subplots()
 ax.bar(surf_ids, counts)
 # ax.set_yscale('log')
 ax.set_xticks(surf_ids)
-ax.set_xticklabels([mesh_id_to_name[id] for id in surf_ids])
+ax.set_xticklabels(xticklabels)
 ax.set_title('Ray Fates')
 ax.set_xlabel('ID of Last Surface')
 ax.set_ylabel('Hit Counts')

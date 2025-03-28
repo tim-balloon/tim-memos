@@ -35,7 +35,7 @@ lx = {k:v.numpy() for k,v in lx.items()}
 v = mesh.vertex['positions'].numpy()
 t = mesh.triangle['indices'].numpy()
 tidx = lx['primitive_ids']
-uv = lx['primitive_uvs']
+uv = lx['primitive_uvs']    
 w = 1 - np.sum(uv, axis=1)
 c = \
 v[t[tidx, 1].flatten(), :] * uv[:, 0][:, None] + \
@@ -43,7 +43,7 @@ v[t[tidx, 2].flatten(), :] * uv[:, 1][:, None] + \
 v[t[tidx, 0].flatten(), :] * w[:, None]
 
 # Calculate intersection coordinates using ray_ids
-c = rays[lx['ray_ids']][:,:3] + rays[lx['ray_ids']][:,3:]*lx['t_hit'][...,None]
+# c = rays[lx['ray_ids']][:,:3] + rays[lx['ray_ids']][:,3:]*lx['t_hit'][...,None]
 
 # Visualize the rays and intersections.
 lines = o3d.t.geometry.LineSet()

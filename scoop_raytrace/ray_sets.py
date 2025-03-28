@@ -19,6 +19,7 @@ def simple_fan(radii):
         ray_list,
         dtype=o3d.core.Dtype.Float32
     )
+    rays[:,:3] += 1e-3
     N_rays = rays.numpy().shape[0]
     return rays, N_rays
 
@@ -111,12 +112,11 @@ def angular_sector():
 
     # shoot a bundle of rays, each rotated by a small amount relative to the main
     # aim vector
-    theta_half_angle = np.pi/4
-    phi_half_angle = np.pi/4
-    N_bundle_side = 100
+    theta_half_angle = np.pi/8
+    phi_half_angle = np.pi/8
+    N_bundle_side = 10
     thetas = np.linspace(-theta_half_angle, theta_half_angle, num=N_bundle_side)
     phis = np.linspace(-phi_half_angle, phi_half_angle, num=N_bundle_side)
-    # rays_per_origin = 100
     ray_list = []
     for i in range(len(xflat)):
         print(f'{(i+1) / len(xflat):.2f}', end='\r')
