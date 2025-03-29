@@ -18,7 +18,7 @@ t_sec = 52.55e-3
 h_sec_vertex = 1.225
 # scoop main body
 min_el = 20. * np.pi / 180.
-dh = -1. # shorten the scoop?
+dh = -1.5 # shorten the scoop?
 h = 2. * r_out / np.arctan(min_el) + dh
 scoop_back = 0
 scoop_front = h
@@ -118,8 +118,6 @@ def get_geometry():
     rear_shield = o3d.t.geometry.TriangleMesh.from_legacy(rear_shield)
 
     # clip off the front and back faces of the scoop
-    # scoop = scoop.clip_plane(point=[0,0,scoop_front-1e-6], normal=[0,0,-1])
-    # scoop = scoop.clip_plane(point=[0,0,scoop_back+1e-6], normal=[0,0,1])
     # clip off an angled portion of the scoop
     scoop_angle = (np.pi / 2.) - min_el
     y_proj = np.sin(scoop_angle)
@@ -225,7 +223,7 @@ def get_geometry():
     [m.compute_vertex_normals() for m in meshes]
     [m.compute_triangle_normals() for m in meshes]
 
-    absorber_meshes = [cryostat_window, rear_shield]
+    absorber_meshes = [cryostat_window, primary, rear_shield]
 
     print('Computing convex hull for incoming rad membership...')
     system_hull = scoop.compute_convex_hull().boolean_union(primary.compute_convex_hull())
