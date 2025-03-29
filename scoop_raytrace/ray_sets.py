@@ -162,9 +162,7 @@ def plot_rays(u, v):
         alpha=alpha
     )
     ax.scatter(0,0,0)
-    ax.set_aspect('equal')
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    plt.show()
     return fig, ax

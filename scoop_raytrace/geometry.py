@@ -4,7 +4,7 @@ import open3d as o3d
 
 
 # sometimes useful to downsample primary/secondary meshes for faster debugging
-MESH_RES_FACTOR = .2
+MESH_RES_FACTOR = 1
 
 # primary
 f = 1.6
@@ -18,7 +18,7 @@ t_sec = 52.55e-3
 h_sec_vertex = 1.225
 # scoop main body
 min_el = 20. * np.pi / 180.
-dh = -1.5 # shorten the scoop?
+dh = -1. # shorten the scoop?
 h = 2. * r_out / np.arctan(min_el) + dh
 scoop_back = 0
 scoop_front = h
@@ -92,8 +92,8 @@ def get_geometry():
     midpoint_y = inradius * np.sin(2. * side_halfangle)
     vertex_y = r_scoop * np.sin(side_halfangle)
 
-    scoop_inside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop, height=h+1e-3, resolution=8, split=4)
-    scoop_outside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop+scoop_thickness, height=h, resolution=8, split=4)
+    scoop_inside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop, height=h+1e-3, resolution=8, split=1)
+    scoop_outside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop+scoop_thickness, height=h, resolution=8, split=1)
     scoop = scoop_outside.boolean_difference(scoop_inside)
     scoop.translate([0, 0, h/2])
     scoop = o3d.t.geometry.TriangleMesh.to_legacy(scoop)
@@ -105,8 +105,8 @@ def get_geometry():
     # rear_shield = rear_shield.clip_plane(point=[0,0,scoop_front-1e-6], normal=[0,0,-1])
     # rear_shield = rear_shield.clip_plane(point=[0,0,scoop_front/2], normal=[0,0,1])
     h_shield = h / 4
-    rear_shield_inside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop, height=h_shield+1e-3, resolution=8, split=4)
-    rear_shield_outside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop+scoop_thickness, height=h_shield, resolution=8, split=4)
+    rear_shield_inside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop, height=h_shield+1e-3, resolution=8, split=1)
+    rear_shield_outside = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_scoop+scoop_thickness, height=h_shield, resolution=8, split=1)
     rear_shield = rear_shield_outside.boolean_difference(rear_shield_inside)
     rear_shield.translate([0, 0, -h_shield/2 + .18])
     rear_shield.compute_vertex_normals()
@@ -201,7 +201,7 @@ def get_geometry():
 
     # create a central baffle
     # h_snoot = .18
-    # snoot = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_in, height=h_snoot, resolution=50, split=4)
+    # snoot = o3d.t.geometry.TriangleMesh.create_cylinder(radius=r_in, height=h_snoot, resolution=50, split=1)
     # snoot.translate([0, 0, h_snoot/2])
     # snoot_front = h_snoot
     # snoot_back = 0
@@ -227,6 +227,7 @@ def get_geometry():
 
     absorber_meshes = [cryostat_window, rear_shield]
 
+    print('Computing convex hull for incoming rad membership...')
     system_hull = scoop.compute_convex_hull().boolean_union(primary.compute_convex_hull())
     system_hull = system_hull.compute_convex_hull()
     system_hull = o3d.t.geometry.TriangleMesh.from_legacy(

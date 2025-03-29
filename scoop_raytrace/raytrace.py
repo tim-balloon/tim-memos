@@ -62,17 +62,17 @@ class RayPath(object):
 print('Creating meshes...')
 meshes, mesh_names, absorber_meshes, system_hull = geometry.get_geometry()
 
-print('Creating ray bundles...')
-rays, N_rays = ray_sets.angular_sector()
-# rays, N_rays = ray_sets.simple_fan([1 - 1e-1, .75, .51 + 1e-2])
-# rays, N_rays = ray_sets.random_disc(1, 100, [0, 0, 10], [0, 0, -1])
-
 print('Creating scene...')
 scene = o3d.t.geometry.RaycastingScene()
 mesh_ids = [scene.add_triangles(m) for m in meshes]
 geom_dict = {mesh_ids[i]: m for i, m in enumerate(meshes)}
 mesh_ids = [o3d.t.geometry.RaycastingScene.INVALID_ID] + mesh_ids
 mesh_id_to_name = {mesh_ids[i]: mesh_name for i, mesh_name in enumerate(mesh_names)}
+
+print('Creating ray bundles...')
+rays, N_rays = ray_sets.angular_sector()
+# rays, N_rays = ray_sets.simple_fan([1 - 1e-1, .75, .51 + 1e-2])
+# rays, N_rays = ray_sets.random_disc(1, 100, [0, 0, 10], [0, 0, -1])
 
 # store history of each ray
 paths = [RayPath(i) for i in range(N_rays)]
