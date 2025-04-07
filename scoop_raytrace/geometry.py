@@ -18,7 +18,7 @@ t_sec = 52.55e-3
 h_sec_vertex = 1.225
 # scoop main body
 min_el = 20. * np.pi / 180.
-dh = -1.5 # shorten the scoop?
+dh = -1.25 # shorten the scoop?
 h = 2. * r_out / np.arctan(min_el) + dh
 scoop_back = 0
 scoop_front = h
@@ -78,6 +78,44 @@ def get_geometry():
     secondary.orient_triangles()
     secondary = o3d.t.geometry.TriangleMesh.from_legacy(secondary)
 
+    # tripod legs
+    d_spider = 54e-3
+    h_spider = 1401.27e-3 + 2 * 40e-3
+    phi_spider = np.arcsin(h_sec_vertex / h_spider) # angle from vertical
+    print('phi_spider:', phi_spider * 180/np.pi)
+    spider_attachment_spacing = 0.1
+    r_spider_lower_attachment = (r_out + r_scoop) / 2.
+    y_spider = (
+        -(h_spider / 2.) * np.cos(phi_spider) 
+        - r_sec_out
+        - spider_attachment_spacing
+    ) # final location of midpoint of strut cylinder
+    z_spider = (
+        r_spider_lower_attachment
+        - (h_spider / 2.) * np.sin(phi_spider)
+        + spider_attachment_spacing
+        + z.max()
+    ) # final location of midpoint of strut cylinder
+    proto_spider = o3d.t.geometry.TriangleMesh.create_cylinder(
+        radius=d_spider/2.,
+        height=h_spider,
+        resolution=int(500 * MESH_RES_FACTOR),
+        split=1
+    )
+    proto_spider.translate([0, y_spider, z_spider])
+    proto_spider = o3d.t.geometry.TriangleMesh.to_legacy(proto_spider)
+    R = proto_spider.get_rotation_matrix_from_axis_angle([-(np.pi/2. - phi_spider), 0, 0])
+    proto_spider.rotate(R)
+    proto_spider.paint_uniform_color([0.3, 0.3, 0.3])
+    proto_spider = o3d.t.geometry.TriangleMesh.from_legacy(proto_spider)
+    spider = []
+    for i in range(3):
+        this_spider = proto_spider.clone()
+        this_spider = o3d.t.geometry.TriangleMesh.to_legacy(this_spider)
+        R = this_spider.get_rotation_matrix_from_axis_angle([0., 0., i * 120. * np.pi / 180.])
+        this_spider.rotate(R, center=[0.,0.,0.])
+        spider.append(o3d.t.geometry.TriangleMesh.from_legacy(this_spider))
+
     # scoop
     # let the scoop be a thin shell, to remain manifold
     print(f'scoop len: {h}')
@@ -133,7 +171,7 @@ def get_geometry():
     scoop.compute_vertex_normals()
     scoop.compute_triangle_normals()
     scoop = o3d.t.geometry.TriangleMesh.to_legacy(scoop)
-    scoop.paint_uniform_color([0.7, 0.7, 0.9])
+    scoop.paint_uniform_color([0.9, 0.9, 0.9])
     scoop.orient_triangles()
     scoop = o3d.t.geometry.TriangleMesh.from_legacy(scoop)
 
@@ -219,11 +257,11 @@ def get_geometry():
     cryostat_window = o3d.t.geometry.TriangleMesh.from_legacy(cryostat_window)
 
     # prepare meshes for rendering and calculation
-    meshes = [scoop, rear_shield, primary, secondary, cryostat_window] + louvers
+    meshes = [scoop, rear_shield, primary, secondary, cryostat_window] + spider + louvers
     [m.compute_vertex_normals() for m in meshes]
     [m.compute_triangle_normals() for m in meshes]
 
-    absorber_meshes = [cryostat_window, primary, rear_shield]
+    absorber_meshes = [cryostat_window, rear_shield]
 
     print('Computing convex hull for incoming rad membership...')
     system_hull = scoop.compute_convex_hull().boolean_union(primary.compute_convex_hull())
@@ -241,7 +279,7 @@ def get_geometry():
         'primary',
         'secondary',
         'cryostat_window'
-    ] + [f'louvers{i}' for i in range(len(louvers))]
+    ] + [f'spider{i}' for i in range(len(spider))] + [f'louvers{i}' for i in range(len(louvers))]
 
     # for i, mesh in enumerate(meshes):
         # print('vmanifold?', mesh_names[i], o3d.t.geometry.TriangleMesh.to_legacy(mesh).is_self_intersecting())

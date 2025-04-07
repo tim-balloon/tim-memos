@@ -79,7 +79,7 @@ print('Creating ray bundles...')
 # construct sample points on a 10 m sphere: note that trial density is greater
 # near poles, but this is just efficiency/angular sampling accuracy
 az_pts = np.arange(-45, 0, 1) * np.pi / 180. + np.pi/2
-el_pts = np.arange(-45, 0, 1) * np.pi / 180.
+el_pts = np.arange(-45, 90, 1) * np.pi / 180.
 aa, ee = np.meshgrid(az_pts, el_pts)
 results_incident = np.zeros_like(aa)
 results_problem = np.zeros_like(aa)
@@ -94,7 +94,7 @@ try:
             z = 10. * np.sin(az)
             nhat = np.array([-x, -y, -z])
             nhat /= np.linalg.norm(nhat)
-            rays, N_rays = ray_sets.random_disc(2.5, 1000, [x, y, z], nhat)
+            rays, N_rays = ray_sets.random_disc(3, 300, [x, y, z], nhat)
             # fig, ax = ray_sets.plot_rays(rays[:,:3].numpy(), rays[:,3:].numpy())
             # ax.set_xlim([-10, 10])
             # ax.set_ylim([-10, 10])
@@ -108,9 +108,11 @@ try:
                 path.append(rays[i], rays[i], o3d.t.geometry.RaycastingScene.INVALID_ID)
 
             # if aluminized mylar/aluminum mirrors have reflection coefficients of
-            # ~.99, any ray is down to ~.6 by 50 bounces
+            # ~.99, any ray is down to ~.6 by 50 bounces (e.g. terahertz, solar)
+            # if radiation is earth glow and rays hit mylarized side of mli, r~0.7,
+            # so down to ~0.34 by 3 bounces 
             max_consecutive_hits = 10 # indicates a ray may be trapped inside a mesh
-            N_bounces = 50
+            N_bounces = 3
             i_bounce = 0
             print('Tracing rays...')
             while i_bounce < N_bounces:
@@ -229,7 +231,7 @@ try:
             # -----------------------------------------------------------------------------
             print('Measuring results...')
             print(f'progress: {idx/end_idx:.2f}')
-            query_surface = 'primary'
+            query_surface = 'cryostat_window'
             last_surfaces_hit = []
             geom = []
             N_incident = 0 # number of rays that entered the structure
@@ -255,14 +257,14 @@ try:
             results_incident[ie][ia] = N_incident
             results_problem[ie][ia] = N_cryo
 
-            # add in the triad for reference
-            # coordinate system triad
+            # # add in the triad for reference
+            # # coordinate system triad
             # triad = o3d.geometry.TriangleMesh.create_coordinate_frame(size=.5, origin=[0,0,0])
             # triad = o3d.t.geometry.TriangleMesh.from_legacy(triad)
             # triad.compute_vertex_normals()
             # auld_meshes += [triad,]
 
-            # convert back to legacy to render
+            # # convert back to legacy to render
             # plot_meshes = [o3d.t.geometry.TriangleMesh.to_legacy(m) for m in auld_meshes]
             # geom += plot_meshes
             # o3d.visualization.draw_geometries(geom, mesh_show_wireframe=False)
