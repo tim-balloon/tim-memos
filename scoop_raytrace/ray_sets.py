@@ -5,6 +5,44 @@ from scipy.spatial.transform import Rotation
 import open3d as o3d
 
 
+class RayPath(object):
+    # an identified list of ray bounces with some properties
+    def __init__(self, id):
+        self.id = id
+        self.rays = []
+        self.n_bounces = 0
+        self.surfaces_hit = []
+        self.last_pos = [np.inf, np.inf, np.inf]
+        self.color = [0.5, 0.5, 0.5]
+        self.lines = []
+        self.incident = False # becomes true first time last_pos is inside system convex hull
+        self.terminated = False
+
+    def ray_to_line(self, start:o3d.core.Tensor, end:o3d.core.Tensor):
+        l = o3d.t.geometry.LineSet(
+            np.vstack([start[u_].numpy(), end[u_].numpy()]),
+            np.array([[0,1]])
+        )
+        self.last_pos = end[u_]
+        return l
+
+    def append(self, ray_start, ray_end, surf_hit_id):
+        self.rays.append(ray_end)
+        line = self.ray_to_line(ray_start, ray_end)
+        self.lines.append(line) # TODO: refactor to use LineSet properly
+        self.n_bounces += 1
+        self.surfaces_hit.append(surf_hit_id)
+
+    def apply_color(self, rgb):
+        self.color = rgb
+        colored_lines = []
+        for line in self.lines:
+            ls = o3d.t.geometry.LineSet.to_legacy(line)
+            ls.paint_uniform_color(rgb)
+            colored_lines.append(o3d.t.geometry.LineSet.from_legacy(ls))
+        self.lines = colored_lines
+
+
 def simple_fan(radii):
     # [r_out - 1e-6, r_sec_out + 1e-6]
     # on-axis, sparse
