@@ -167,13 +167,13 @@ def observability(names:list, ras:list, decs:list, observer:Observer, times, plo
     return coord, table
 
 
-def time_vs_altitude(observer, target, times):
+def time_vs_altitude(observer, targets:list, times):
     fig, ax = plt.subplots(figsize=(12,4))
-    plot_altitude(target, observer, times, ax=ax, style_kwargs=dict(color='k'))
+    plot_altitude(targets, observer, times, ax=ax)
     ax.axhline(EL_MIN, color='limegreen')
     ax.axhline(EL_MAX, color='limegreen')
     ax.axhspan(EL_MIN, EL_MAX, color='limegreen', alpha=0.3)
-    ax.set_title(target.name)
+    ax.legend()
     ax.grid(True)
     fig.tight_layout()
     plt.show()
@@ -228,3 +228,5 @@ if __name__ == '__main__':
     my_label1 = 'RCW 37'
 
     _, table = observability([my_label, my_label1], [coord.ra, coord1.ra,], [coord.dec, coord1.dec,], tim, times, plot=False)
+
+    fig, ax = time_vs_altitude(tim, [FixedTarget(coord, my_label), FixedTarget(coord1, my_label1),], times)
