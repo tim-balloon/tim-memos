@@ -136,13 +136,19 @@ For these estimates, we take the operating voltage as measured by preflight chec
 
 Total: 407.4 W
 
-Clearly, some of these readings are not to be trusted. Aside from the magical electron-creating watchdog, and the fact that many readings are strangely close to either 1 A or 0.5 A, we should not trust a 0.78 A average, 3.43 A peak, ~21 W average figure for the pivot, which for long periods (longer than the 1s report rate of this channel) was required to pull 8-15 A to avoid sticking.
+FC and SC wattages are slightly high, but not surprising for PCs that are also powering USB hubs and USB-serial converters (FCs), and lens controllers and USB cameras (SCs). Summed gyro and magnetometer wattages were ~1.4x higher than expected. It seems that the current monitor for the watchdog may have been reporting invalid values. It's extremely unlikely for such a small and simple board, running two USB chips and two watchdog timers, to be drawing 3 A continuously.
 
-For comparison, the motor controllers report current at 200 Hz, which gives us for the pivot 5.24 A average, 15.1 A peak, for a ~147 W average. For the reaction wheel, 1.67 A average, 14.9 A peak, and ~80 W average. For the elevation drive, 0.464 A average, 5.48 A peak, and ~13.0 W average. These three sources total up to ~240 W, equivalent to the entire gondola power draw reported by the PBoBs.
+For the pointing motors, their wattages were much lower than expected, given the supply voltages and commanded/reported currents. The wattages estimated from the supply voltages and the motor controller's internal current readings were:
+
+| Motor | Average Current (A) | Average Power (W) | Max Current (A) | Max Power (W) |
+| ----- | ------------------- | ----------------- | --------------- | ------------- |
+| Reaction Wheel | 1.667 | 80.093 | 14.86 | 713.28 |
+| Elevation | 0.464 | 13.000 | 5.48 | 153.44 |
+| Pivot |  5.237 | 146.641 | 15.1 | 422.8 |
 
 # Science Flight Power Budget
 
-Rather than use the unreliable test flight power draw for non-motor items, we use rough estimates from datasheets.
+To cross-check the data from the inflight sensors, which we know to be suspect for at least some devices, and forecast a power budget for the hardware we will fly on the science flight, we take typical power draw values from spec sheets. We adopt the estimated motor power draw figures instead of the measured ones.
 
 | Item/Subsystem | Typical Power Draw (W) | Max Power Draw (W) | Qty. | Notes |
 | -------------- | ---------------------- | ------------------ | ---- | ----- |
