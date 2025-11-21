@@ -197,6 +197,8 @@ def ground_track(observer, times):
     ax.set_title(f'Looking Down:\nGround Track: {(t[-1] - t[0]).to(u.day).value:.1f} days')
     fig.colorbar(mappable, ax=ax, label='Time Since Launch (hr)')
     fig.tight_layout()
+    ax.set_facecolor('lightgrey')
+    fig.set_facecolor('lightgrey')
     plt.show()
     return fig, ax
 
