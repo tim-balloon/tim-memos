@@ -140,7 +140,7 @@ def observability(names:list, ras:list, decs:list, observer:Observer, times, plo
             extent = [-0.5, -0.5+len(times), -0.5, len(constraints) - 0.5]
 
             fig, ax = plt.subplots(figsize=(10,4))
-            ax.imshow(observability_grid, extent=extent, cmap='RdYlGn', vmin=0, vmax=1, origin='lower')
+            ax.imshow(observability_grid, extent=extent, cmap='bone_r', vmin=0, vmax=1, origin='lower')
 
             ax.set_yticks(range(0, len(constraints)))
             ax.set_yticklabels([c.__class__.__name__ for c in constraints])
@@ -158,7 +158,8 @@ def observability(names:list, ras:list, decs:list, observer:Observer, times, plo
             ax.tick_params(axis='y', which='minor', left='off')
             ax.set_xlabel('Time on {0} (UTC)'.format(times[0].datetime.date()))
             fig.subplots_adjust(left=0.25, right=0.9, top=0.9, bottom=0.1)
-            ax.set_title(f'{target.name}: {table["fraction of time observable"][j] * (times[-1] - times[0]).to(u.hr):.2f}')
+            ax.set_title(f'{target.name}: {table["fraction of time observable"][j] * (times[-1] - times[0]).to(u.hr):.2f}' + 
+                         '\nBlack = Observable')
             fig.tight_layout()
         plt.show()
     print(table)
