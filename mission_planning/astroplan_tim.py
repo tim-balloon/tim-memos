@@ -180,6 +180,31 @@ def time_vs_altitude(observer, target, times):
     return fig, ax
 
 
+def time_vs_sun_relative_az(observer, targets, times):
+    '''
+    Plot the sun-relative azimuth of the observer when observing the target.
+    This is a delta azimuth, target az - sun az. Positive angles denote the
+    observer is pointed to a greater azimuth angle than the sun,
+    clockwise viewed from above.
+    '''
+    fig, ax = plt.subplots(figsize=(12,4))
+    for target in targets:
+        ax.plot(
+            timespan,
+            wrap360(
+                observer.altaz(times, target=target).az.deg -
+                tim.sun_altaz(times).az.deg
+            ),
+            marker='.'
+        )
+    ax.axhline(DAZ_MIN, color='limegreen')
+    ax.axhline(DAZ_MAX, color='limegreen')
+    ax.axhspan(DAZ_MIN, DAZ_MAX, color='limegreen', alpha=0.3)
+    fig.tight_layout()
+    plt.show()
+    return fig, ax
+
+
 def ground_track(observer, times):
     this_lon = observer.longitude
     this_lat = observer.latitude
