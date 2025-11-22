@@ -62,7 +62,7 @@ def dispatch_analysis():
     if 'constraints' in my_method:
         _, _ = observability([my_label,], [coord.ra,], [coord.dec,], tim, times)
     elif 'time_vs_altitude' in my_method:
-        _, _ = time_vs_altitude(tim, FixedTarget(coord, my_label), times)
+        _, _ = time_vs_altitude(tim, [FixedTarget(coord, my_label),], times)
     elif 'ground_track' in my_method:
         _, _ = ground_track(tim, times)
     else:
