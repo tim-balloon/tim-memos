@@ -11,7 +11,8 @@ from tkinter import *
 from tkinter import font
 from tkinter import ttk
 
-from astroplan_tim import get_observer, observability, time_vs_altitude, ground_track
+from astroplan_tim import get_observer, observability, time_vs_altitude
+from astroplan_tim import time_vs_sun_relative_az, ground_track
 from astroplan_tim import LDB, FLOAT_ALT
 
 
@@ -60,9 +61,12 @@ def dispatch_analysis():
 
     # Dispatch call
     if 'constraints' in my_method:
-        _, _ = observability([my_label,], [coord.ra,], [coord.dec,], tim, times)
+        table = observability([FixedTarget(coord, my_label),], tim, times)
+        print(table)
     elif 'time_vs_altitude' in my_method:
-        _, _ = time_vs_altitude(tim, [FixedTarget(coord, my_label),], times)
+        _, _ = time_vs_altitude([FixedTarget(coord, my_label),], tim, times)
+    elif 'time_vs_sun_relative_az' in my_method:
+        _, _ = time_vs_sun_relative_az([FixedTarget(coord, my_label),], tim, times)
     elif 'ground_track' in my_method:
         _, _ = ground_track(tim, times)
     else:
@@ -163,7 +167,7 @@ if __name__ == '__main__':
     method = ttk.Combobox(mainframe, textvariable=method_var)
     method.state(['readonly'])
     method.grid(stick=(W, E), column=1, row=8)
-    method['values'] = ('constraints', 'time_vs_altitude', 'ground_track')
+    method['values'] = ('constraints', 'time_vs_altitude', 'time_vs_sun_relative_az', 'ground_track')
     root.option_add("*TCombobox*Listbox*Font", default_font)
 
     style = ttk.Style()

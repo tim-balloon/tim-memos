@@ -5,9 +5,13 @@ from astroplan.plots import plot_altitude, plot_finder_image
 from astropy.coordinates import Angle, SkyCoord, EarthLocation, get_body
 from astropy.time import Time
 import astropy.units as u
+from astropy.visualization import time_support, quantity_support
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+time_support()
+quantity_support()
 
 
 EL_MIN = 20
@@ -103,19 +107,7 @@ def get_observer(launch_lat, launch_lon, float_alt, times):
     return observer
 
 
-def observability(names:list, ras:list, decs:list, observer:Observer, times, plot=True):
-    assert len(ras) == len(decs)
-    targets = []
-    for i in range(len(ras)):
-        coord = SkyCoord(
-            ras[i],
-            decs[i],
-            frame='icrs',
-            obstime=times,
-            location=observer.location
-        )
-        targets.append(FixedTarget(coord, names[i]))
-
+def observability(targets:list, observer:Observer, times, plot=True):
     constraints = [
         AltitudeConstraint(EL_MIN * u.deg, EL_MAX * u.deg),
         SunRelativeAzConstraint(min=DAZ_MIN * u.deg, max=DAZ_MAX * u.deg)
@@ -162,12 +154,11 @@ def observability(names:list, ras:list, decs:list, observer:Observer, times, plo
                          '\nBlack = Observable')
             fig.tight_layout()
         plt.show()
-    print(table)
 
-    return coord, table
+    return table
 
 
-def time_vs_altitude(observer, targets:list, times):
+def time_vs_altitude(targets:list, observer, times):
     fig, ax = plt.subplots(figsize=(12,4))
     plot_altitude(targets, observer, times, ax=ax)
     ax.axhline(EL_MIN, color='limegreen')
@@ -180,7 +171,7 @@ def time_vs_altitude(observer, targets:list, times):
     return fig, ax
 
 
-def time_vs_sun_relative_az(observer, targets, times):
+def time_vs_sun_relative_az(targets:list, observer, times):
     '''
     Plot the sun-relative azimuth of the observer when observing the target.
     This is a delta azimuth, target az - sun az. Positive angles denote the
@@ -190,16 +181,19 @@ def time_vs_sun_relative_az(observer, targets, times):
     fig, ax = plt.subplots(figsize=(12,4))
     for target in targets:
         ax.plot(
-            timespan,
+            times,
             wrap360(
                 observer.altaz(times, target=target).az.deg -
-                tim.sun_altaz(times).az.deg
+                observer.sun_altaz(times).az.deg
             ),
-            marker='.'
+            marker='.',
+            label=target.name
         )
     ax.axhline(DAZ_MIN, color='limegreen')
     ax.axhline(DAZ_MAX, color='limegreen')
     ax.axhspan(DAZ_MIN, DAZ_MAX, color='limegreen', alpha=0.3)
+    ax.grid(True)
+    ax.legend()
     fig.tight_layout()
     plt.show()
     return fig, ax
@@ -244,14 +238,27 @@ if __name__ == '__main__':
         times
     )
 
-    foo = SkyCoord.from_name('RCW 38')
-    coord = SkyCoord(foo.ra, foo.dec, obstime=times, location=tim.location)
-    my_label = 'RCW 38'
+    target_names = ['RCW 38', 'RCW 36', 'RCW 19', 'Vy CMa']
+    targets = [FixedTarget.from_name(target_name) for target_name in target_names]
+    goods_s = FixedTarget(
+        SkyCoord(
+            ra='3h32m36.51s',
+            dec='-27d47m33.74s',
+            obstime=times,
+            location=tim.location
+        ),
+        name='GOODS-S'
+    )
+    targets += [goods_s,]
 
-    foo1 = SkyCoord.from_name('RCW 36')
-    coord1 = SkyCoord(foo1.ra, foo1.dec, obstime=times, location=tim.location)
-    my_label1 = 'RCW 37'
+    table = observability(
+        targets,
+        tim,
+        times,
+        plot=False
+    )
+    print(table)
 
-    _, table = observability([my_label, my_label1], [coord.ra, coord1.ra,], [coord.dec, coord1.dec,], tim, times, plot=False)
+    fig, ax = time_vs_altitude(targets, tim, times)
 
-    fig, ax = time_vs_altitude(tim, [FixedTarget(coord, my_label), FixedTarget(coord1, my_label1),], times)
+    fig, ax = time_vs_sun_relative_az(targets, tim, times)
