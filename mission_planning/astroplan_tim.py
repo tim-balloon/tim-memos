@@ -260,5 +260,7 @@ if __name__ == '__main__':
     print(table)
 
     fig, ax = time_vs_altitude(targets, tim, times)
+    ax.set_title('Elevation Axis Limits')
 
     fig, ax = time_vs_sun_relative_az(targets, tim, times)
+    ax.set_title('Sun-Relative Azimuth Angle Limits')
