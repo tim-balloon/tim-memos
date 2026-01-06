@@ -63,9 +63,9 @@ def dispatch_analysis():
         table = observability([FixedTarget(coord, my_label),], tim, times)
         print(table)
     elif 'time_vs_altitude' in my_method:
-        _, _ = time_vs_altitude(tim, [FixedTarget(coord, my_label),], tim, times)
+        _, _ = time_vs_altitude([FixedTarget(coord, my_label),], tim, times)
     elif 'time_vs_airmass' in my_method:
-        _, _ = time_vs_airmass(tim, [FixedTarget(coord, my_label),], times)
+        _, _ = time_vs_airmass([FixedTarget(coord, my_label),], tim, times)
     elif 'time_vs_sun_relative_az' in my_method:
         _, _ = time_vs_sun_relative_az([FixedTarget(coord, my_label),], tim, times)
     elif 'ground_track' in my_method:

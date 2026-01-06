@@ -171,7 +171,7 @@ def time_vs_altitude(targets:list, observer, times):
     return fig, ax
 
 
-def time_vs_airmass(observer, targets:list, times):
+def time_vs_airmass(targets:list, observer, times):
     fig, ax = plt.subplots(figsize=(12,4))
     plot_airmass(targets, observer, times, ax=ax, brightness_shading=False)
     ax.axhline(EL_MIN, color='limegreen')
