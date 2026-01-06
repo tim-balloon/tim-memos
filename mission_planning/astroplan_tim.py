@@ -1,6 +1,6 @@
 from astroplan import Observer, FixedTarget, Constraint, AltitudeConstraint
 from astroplan import is_observable, is_always_observable, observability_table
-from astroplan.plots import plot_altitude, plot_finder_image
+from astroplan.plots import plot_altitude, plot_airmass, plot_finder_image
 
 from astropy.coordinates import Angle, SkyCoord, EarthLocation, get_body
 from astropy.time import Time
@@ -170,6 +170,19 @@ def observability(names:list, ras:list, decs:list, observer:Observer, times, plo
 def time_vs_altitude(observer, targets:list, times):
     fig, ax = plt.subplots(figsize=(12,4))
     plot_altitude(targets, observer, times, ax=ax)
+    ax.axhline(EL_MIN, color='limegreen')
+    ax.axhline(EL_MAX, color='limegreen')
+    ax.axhspan(EL_MIN, EL_MAX, color='limegreen', alpha=0.3)
+    ax.legend()
+    ax.grid(True)
+    fig.tight_layout()
+    plt.show()
+    return fig, ax
+
+
+def time_vs_airmass(observer, targets:list, times):
+    fig, ax = plt.subplots(figsize=(12,4))
+    plot_airmass(targets, observer, times, ax=ax, brightness_shading=False)
     ax.axhline(EL_MIN, color='limegreen')
     ax.axhline(EL_MAX, color='limegreen')
     ax.axhspan(EL_MIN, EL_MAX, color='limegreen', alpha=0.3)
