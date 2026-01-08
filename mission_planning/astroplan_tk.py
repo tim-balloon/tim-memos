@@ -1,6 +1,7 @@
 from astroplan import FixedTarget
 
-from astropy.coordinates import Angle, SkyCoord, EarthLocation
+from astropy.coordinates import Angle, SkyCoord, EarthLocation, get_body
+from astropy.coordinates.name_resolve import NameResolveError
 from astropy.time import Time
 import astropy.units as u
 
@@ -43,8 +44,15 @@ def dispatch_analysis():
     )
 
     if 'name' in my_resolver:
-        foo = SkyCoord.from_name(tgt_name.get())
-        coord = SkyCoord(foo.ra, foo.dec, obstime=times, location=tim.location)
+        try:
+            foo = SkyCoord.from_name(tgt_name.get())
+            coord = SkyCoord(foo.ra, foo.dec, obstime=times, location=tim.location)
+            print(coord.ra)
+        except NameResolveError as e:
+            foo = get_body(tgt_name.get(), times, location=tim.location)
+            coord = SkyCoord(ra=foo.ra[0], dec=foo.dec[0], obstime=times,
+                       location=tim.location)
+            print(coord.ra)
         my_label = tgt_name.get()
     else:
         ra_str, dec_str = tgt_radec.get().split(', ')

@@ -227,7 +227,7 @@ if __name__ == '__main__':
     launch_time = Time('2026-12-25 00:00:00', scale='utc', location=launch_location)
     
     step_hr = 1.0 * u.hr
-    my_duration = 24 * u.hr
+    my_duration = 7 * 24 * u.hr
     timespan = np.arange(0, my_duration.value + step_hr.value, step_hr.value) * u.hr
     times = launch_time + timespan
 
