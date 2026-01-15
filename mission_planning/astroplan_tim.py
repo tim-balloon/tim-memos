@@ -90,20 +90,23 @@ class SunRelativeAzConstraint(Constraint):
         return mask
 
 
-def get_observer(launch_lat, launch_lon, float_alt, times):
+def get_observer(launch_lat, launch_lon, float_alt, times, stationary=False):
     '''Generate an observer object with lat/lon that change over time like a balloon.'''
     t = (times - times[0]).to(u.hr)
     ldb = (launch_lat, launch_lon)
-    # ground track:
-    # Salter Test Flight Universal completed ~1 circuit in 11 days, 6 hr, 57 min.
-    # Average the longitudinal velocity. Really, ballons have a spatial velocity,
-    # so this constant lat assumption is an oversimplification.
-    dlon_dt = -(360 * u.deg / (11 * u.day + 6 * u.hr + 57 * u.min)).to(u.deg / u.hr)
-    lon = ldb[1] + dlon_dt * t
-    lon = wrap360(lon.to(u.deg).value) * u.deg
-    # add a little lat wobble, eyeballed from STFU flight track
-    lat = 0 * u.deg + np.ones_like(lon.value) * ldb[0] + .2 * u.deg * np.sin(lon.to(u.rad) * 15)
-    observer = Observer(longitude=lon, latitude=lat, elevation=float_alt, name="TIM")
+    if not stationary:
+        # ground track:
+        # Salter Test Flight Universal completed ~1 circuit in 11 days, 6 hr, 57 min.
+        # Average the longitudinal velocity. Really, ballons have a spatial velocity,
+        # so this constant lat assumption is an oversimplification.
+        dlon_dt = -(360 * u.deg / (11 * u.day + 6 * u.hr + 57 * u.min)).to(u.deg / u.hr)
+        lon = ldb[1] + dlon_dt * t
+        lon = wrap360(lon.to(u.deg).value) * u.deg
+        # add a little lat wobble, eyeballed from STFU flight track
+        lat = 0 * u.deg + np.ones_like(lon.value) * ldb[0] + .2 * u.deg * np.sin(lon.to(u.rad) * 15)
+        observer = Observer(longitude=lon, latitude=lat, elevation=float_alt, name="TIM")
+    else:
+        observer = Observer(longitude=launch_lon*np.ones_like(t.value), latitude=launch_lat*np.ones_like(t.value), elevation=float_alt, name="TIM")
     return observer
 
 

@@ -39,7 +39,8 @@ def dispatch_analysis():
         launch_location.lat,
         launch_location.lon,
         launch_location.height,
-        times
+        times,
+        stationary=stationaryFlag.get()
     )
 
     if 'name' in my_resolver:
@@ -115,23 +116,27 @@ if __name__ == '__main__':
     alt_entry = ttk.Entry(mainframe, width=6, textvariable=alt)
     alt_entry.grid(column=0, row=6, sticky=(W, E))
 
+    stationaryFlag = BooleanVar(value=False)
+    is_stationary = ttk.Checkbutton(mainframe, text="Stationary lat/lon/alt",
+        variable=stationaryFlag)
+    is_stationary.grid(column=0, row=7, sticky=(W,E))
 
     # Mission duration
-    ttk.Label(mainframe, text='Mission Time', font=bold_font).grid(column=0, row=7, sticky=W)
-    ttk.Label(mainframe, text='Launch Date (UTC)\n[YYYY-MM-DD HH:MM:SS]').grid(column=0, row=8, sticky=W)
+    ttk.Label(mainframe, text='Mission Time', font=bold_font).grid(column=0, row=8, sticky=W)
+    ttk.Label(mainframe, text='Launch Date (UTC)\n[YYYY-MM-DD HH:MM:SS]').grid(column=0, row=9, sticky=W)
     launch_date = StringVar()
     launch_date_entry = ttk.Entry(mainframe, width=19, textvariable=launch_date)
-    launch_date_entry.grid(column=0, row=9, sticky=(W, E))
+    launch_date_entry.grid(column=0, row=10, sticky=(W, E))
 
-    ttk.Label(mainframe, text='Duration (hr)').grid(column=0, row=10, sticky=W)
+    ttk.Label(mainframe, text='Duration (hr)').grid(column=0, row=11, sticky=W)
     duration = DoubleVar()
     duration_entry = ttk.Entry(mainframe, width=3, textvariable=duration)
-    duration_entry.grid(column=0, row=11, sticky=(W, E))
+    duration_entry.grid(column=0, row=12, sticky=(W, E))
 
-    ttk.Label(mainframe, text='Time step (hr)').grid(column=0, row=12, sticky=W)
+    ttk.Label(mainframe, text='Time step (hr)').grid(column=0, row=13, sticky=W)
     dt = DoubleVar()
     dt_entry = ttk.Entry(mainframe, width=3, textvariable=dt)
-    dt_entry.grid(column=0, row=13, sticky=(W, E))
+    dt_entry.grid(column=0, row=14, sticky=(W, E))
 
 
     # Target
@@ -184,10 +189,10 @@ if __name__ == '__main__':
     style.configure('My.TButton', font=default_font, background='#77ddff', foreground='#1111ff')
     # style.map('My.TButton', background=[('active', '#ff0000')])
     go = ttk.Button(mainframe, text='Go', style='My.TButton', command=dispatch_analysis)
-    go.grid(sticky=(W,E), row=13, column=2)
+    go.grid(sticky=(W,E), row=14, column=2)
 
     exit_button = ttk.Button(mainframe, text='Exit', command=cleanup)
-    exit_button.grid(sticky=(W,E), row=13, column=1)
+    exit_button.grid(sticky=(W,E), row=14, column=1)
 
     # Prepare for startup
     root.columnconfigure(0, weight=1)
